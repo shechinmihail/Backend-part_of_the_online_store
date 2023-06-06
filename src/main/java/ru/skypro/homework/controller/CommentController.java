@@ -10,6 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * CommentController
+ * Контроллер для обработки REST-запросов, добавление, удаление, редактирование и поиска комментарии
+ * @see
+ */
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -19,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     /**
-     * Получить комментарии объявления    *
+     * Получить комментарии объявления
      * @param id
      * @return
      */
@@ -49,7 +54,7 @@ public class CommentController {
     }
 
     /**
-     * Добавить комментарий к объявлению     *
+     * Добавить комментарий к объявлению
      * @param id
      * @return
      */
@@ -79,7 +84,7 @@ public class CommentController {
     }
 
     /**
-     * Удалить комментарий   *
+     * Удалить комментарий
      * @param adId, commentId
      * @return
      */
@@ -118,7 +123,7 @@ public class CommentController {
     }
 
     /**
-     * Обновить комментарий    *
+     * Обновить комментарий
      * @param adId, commentId
      * @return
      */
