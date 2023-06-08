@@ -5,19 +5,19 @@ import lombok.Data;
 import javax.persistence.*;
 
 /**
- * Класс Ad, представляет сущность объявления
+ * Класс AdsEntity, представляет сущность объявления
  */
 @Entity
 @Data
 @Table(name = "ads")
-public class Ads {
+public class AdsEntity {
 
     /**
      * Идентификационный номер (id) объявления
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     /**
      * Описание объявления
@@ -39,10 +39,10 @@ public class Ads {
      */
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User author;
+    private UserEntity author;
 
     /**
-     * Изображение пользователя
+     * Изображение объявления
      */
     @OneToOne
     @JoinColumn(name = "image_id")

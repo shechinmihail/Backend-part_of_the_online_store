@@ -13,14 +13,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @Data
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
     /**
      * Идентификационный номер (id) пользователя
      */
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    private Integer id;
 
     /**
      * Имя пользователя
