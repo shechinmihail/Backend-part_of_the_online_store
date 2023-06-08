@@ -45,7 +45,7 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public CommentEntity addComment(@NotNull Integer adsId, CommentEntity newCommentEntity) {
-     //здесь еще нужно добавить код который привяжет комментарий к конкретному объявлению
+     // TODO здесь еще нужно добавить код который привяжет комментарий к конкретному объявлению
 
         return commentRepository.save(newCommentEntity);
     }
@@ -78,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
         }
         CommentEntity updateCommentEntity = commentRepository.getById(commentId);
         updateCommentEntity.setText(newText);
-        // меняется только текст? Дата создания не меняется на дату изменения
+        // TODO меняется только текст? Дата создания не меняется на дату изменения
 
         return commentRepository.save(updateCommentEntity);
     }
