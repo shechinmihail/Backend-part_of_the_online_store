@@ -19,7 +19,7 @@ public class Image {
      */
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    private Integer id;
 
     /**
      * Путь к изображению

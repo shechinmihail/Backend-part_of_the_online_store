@@ -21,11 +21,11 @@ public class CommentEntity {
     @Column(name = "id")
     private Integer id;
 
-    /**
-     * Идентификационный номер (id) объявления
-     */
-    @Column(name = "ads_id")
-    private Integer adsId;
+//    /**
+//     * Идентификационный номер (id) объявления
+//     */
+//    @Column(name = "ads_id")
+//    private Integer pk;                           по моему это лишнее
 
     /**
      * Идентификационный номер (id) автора
