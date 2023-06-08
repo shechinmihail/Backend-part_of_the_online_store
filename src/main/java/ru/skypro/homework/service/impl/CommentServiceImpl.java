@@ -27,7 +27,7 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет получить все комментарии к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getByAdsId(Integer)}
      * @param adsId (не может быть null)
-     * @return возвращает все комментарии к определенному объявлению
+     * @return возвращает все комментарии к определенному объявлению!!!!!
      */
     @Override
     public Collection<CommentEntity> getComments(Integer adsId) {
