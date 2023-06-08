@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(name = "ads")
-public class Ads {
+public class AdsEntity {
 
     /**
      * Идентификационный номер (id) объявления
