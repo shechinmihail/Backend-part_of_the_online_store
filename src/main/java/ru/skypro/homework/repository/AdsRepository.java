@@ -9,6 +9,6 @@ import ru.skypro.homework.entity.AdsEntity;
  * для работы с БД (для объявлений)
  */
 @Repository
-public interface AdsRepository extends JpaRepository<AdsEntity, Long> {
+public interface AdsRepository extends JpaRepository<AdsEntity, Integer> {
 
 }

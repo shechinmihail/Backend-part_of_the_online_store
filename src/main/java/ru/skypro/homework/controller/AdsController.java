@@ -51,8 +51,8 @@ public class AdsController {
     /**
      * Функция добавление объявления
      *
-     * @param properties
-     * @param image
+     * @param properties характеристики объявления
+     * @param image      картинка объявления
      * @return возвращает объект, содержащий данные созданного объявления
      */
     @Operation(
@@ -141,7 +141,7 @@ public class AdsController {
      * Функция обновления объявления по идентификатору (id), хранящихся в базе данных
      *
      * @param id        идентификатор объявления, не может быть null
-     * @param createAds
+     * @param createAds данные объявления
      * @return возвращает обновленное объявление по идентификатору (id)
      */
     @Operation(
@@ -198,7 +198,7 @@ public class AdsController {
             }
     )
     @GetMapping("me") //GET http://localhost:8080/abs/me
-    public ResponseEntity<ResponseWrapperAds> getMeAds() {
+    public ResponseEntity<ResponseWrapperAds> getAdsMe() {
         return ResponseEntity.ok().build();
     }
 
@@ -206,7 +206,7 @@ public class AdsController {
      * Функция обновления картинки объявления
      *
      * @param id    идентификатор объявления, не может быть null
-     * @param image
+     * @param image картинка объявления
      * @return обновленная картинка объявления
      */
     @Operation(
@@ -231,7 +231,7 @@ public class AdsController {
     )
     @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //PATCH http://localhost:8080/abs/{id}/image
-    public ResponseEntity<String> updateImageAds(@PathVariable int id,
+    public ResponseEntity<String> updateImage(@PathVariable int id,
                                                  @RequestPart MultipartFile image) {
         return ResponseEntity.ok().build();
     }

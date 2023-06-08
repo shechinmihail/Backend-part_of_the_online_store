@@ -5,7 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 
 /**
- * Класс Ad, представляет сущность объявления
+ * Класс AdsEntity, представляет сущность объявления
  */
 @Entity
 @Data
@@ -25,7 +25,7 @@ public class AdsEntity {
     private String description;
 
     /**
-     * Цена товара в объявлении
+     * Цена объявления
      */
     private int price;
 
@@ -39,13 +39,13 @@ public class AdsEntity {
      */
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User author;
+    private UserEntity author;
 
     /**
-     * Изображение пользователя
+     * Ссылка на картинку объявления
      */
     @OneToOne
     @JoinColumn(name = "image_id")
-    private Image image;
+    private ImageEntity imageEntity;
 
 }
