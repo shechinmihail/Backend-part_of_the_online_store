@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
+import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
@@ -22,9 +24,14 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(User.class);
 
     /**
-     * Поле репозитория объявлении
+     * Поле репозитория пользователя
      */
     private final UserRepository userRepository;
+
+    /**
+     * Поле маппинга пользователя
+     */
+    private UserMapper userMapper;
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -46,6 +53,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
+        userEntity.setPassword(newPassword.getNewPassword());
+        userRepository.save(userEntity);
+        userMapper.toDto(userEntity);
     }
 
     /**
@@ -57,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(Authentication authentication) {
         logger.info("Вызван метод получения информации об авторизованном пользователе");
-        return null;
+        return UserMapper.INSTANCE.toDto(userRepository.getUserEntitiesByEmail(authentication.getName()));
     }
 
     /**
@@ -70,7 +81,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        return null;
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
+        userEntity.setFirstName(user.getFirstName());
+        userEntity.setLastName(user.getLastName());
+        userEntity.setPhone(user.getPhone());
+        userRepository.save(userEntity);
+        return userMapper.toDto(userEntity);
     }
 
     /**

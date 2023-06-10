@@ -15,9 +15,8 @@ import java.util.Collection;
 public interface AdsMapper {
 
     AdsMapper INSTANCE = Mappers.getMapper(AdsMapper.class);
-
-    @Mapping(target = "author.id", source = "author")
-    @Mapping(target = "id", source = "pk")
+    @Mapping(source = "id", target = "pk")
+    @Mapping(source = "author.id", target = "author")
     Ads toDto(AdsEntity adsEntity);
 
     @Mapping(source = "id",target = "pk")

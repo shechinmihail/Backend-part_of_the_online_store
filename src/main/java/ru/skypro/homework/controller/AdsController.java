@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.service.impl.AdsServiceImpl;
+
+import java.util.List;
 
 /**
  * AdsController
@@ -24,6 +27,11 @@ import ru.skypro.homework.dto.*;
 @RequiredArgsConstructor
 @RequestMapping("ads")
 public class AdsController {
+
+    /**
+     * Поле сервиса объявлений
+     */
+    private final AdsServiceImpl adsServiceImpl;
 
     /**
      * Функция получения всех объявлений, хранящихся в базе данных
@@ -44,8 +52,9 @@ public class AdsController {
             }
     )
     @GetMapping(path = "all")  //GET http://localhost:8080/abs/all
-    public ResponseEntity<ResponseWrapperAds> getAllAds() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ResponseWrapperAds> getAllAds(@RequestParam(required = false) String title) {
+        ResponseWrapperAds ads = new ResponseWrapperAds((List<Ads>) adsServiceImpl.getAllAds(title));
+        return ResponseEntity.ok(ads);
     }
 
     /**

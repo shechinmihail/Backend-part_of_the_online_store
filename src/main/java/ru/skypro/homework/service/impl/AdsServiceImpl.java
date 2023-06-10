@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.entity.AdsEntity;
+import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 
@@ -45,7 +47,10 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Collection<Ads> getAllAds(String title) {
         logger.info("Вызван метод получения всех объявлений");
-        return null;
+        if (title == null) {
+            return AdsMapper.INSTANCE.adsToCollectionDto(adsRepository.findAll());
+        }
+        return AdsMapper.INSTANCE.adsToCollectionDto(adsRepository.findByTitle(title));
     }
 
     /**
@@ -59,7 +64,13 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication) {
         logger.info("Вызван метод добавления объявления");
-        return null;
+        if (createAds == null) {
+            throw new RuntimeException("");
+        }
+        AdsEntity adsEntity = AdsMapper.INSTANCE.toEntity(createAds);
+        adsRepository.save(adsEntity);
+
+        return AdsMapper.INSTANCE.toDto(adsEntity);
     }
 
     /**
@@ -71,7 +82,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAds getAds(Integer adsId) {
         logger.info("Вызван метод получения объявления по идентификатору (id)");
-        return null;
+        return AdsMapper.INSTANCE.adToFullAdsDto(adsRepository.findById(adsId).orElseThrow());
     }
 
     /**
@@ -83,6 +94,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public void deleteAds(Integer adsId, Authentication authentication) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
+        adsRepository.deleteById(adsId);
     }
 
     /**
@@ -96,7 +108,13 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId, Authentication authentication) {
         logger.info("Вызван метод обновления объявления по идентификатору (id)");
-        return null;
+        if (adsId == null || !adsRepository.findById(adsId).isPresent()) {
+            return null;
+        }
+        AdsEntity adsEntity = AdsMapper.INSTANCE.toEntity(createAds);
+        adsRepository.save(adsEntity);
+
+        return AdsMapper.INSTANCE.toDto(adsEntity);
     }
 
     /**
