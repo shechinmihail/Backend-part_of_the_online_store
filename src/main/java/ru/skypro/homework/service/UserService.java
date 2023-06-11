@@ -15,5 +15,5 @@ public interface UserService {
 
     User updateUser(User user, Authentication authentication);
 
-    void updateUserImage(MultipartFile image, Authentication authentication) throws IOException;
+    void updateUserImage(MultipartFile image, Authentication authentication);
 }

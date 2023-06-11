@@ -6,13 +6,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -25,7 +29,7 @@ import java.util.List;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("ads")
+@RequestMapping("/ads")
 public class AdsController {
 
     /**
@@ -36,6 +40,7 @@ public class AdsController {
     /**
      * Функция получения всех объявлений, хранящихся в базе данных
      *
+     * @param title заголовок объявления
      * @return возвращает все объявления
      */
     @Operation(
@@ -43,15 +48,16 @@ public class AdsController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Получены все объявления",
+                            description = "ОК",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ResponseWrapperAds.class)
                             )
                     )
             }
+
     )
-    @GetMapping(path = "all")  //GET http://localhost:8080/abs/all
+    @GetMapping(path = "/all")  //GET http://localhost:8080/abs/all
     public ResponseEntity<ResponseWrapperAds> getAllAds(@RequestParam(required = false) String title) {
         ResponseWrapperAds ads = new ResponseWrapperAds((List<Ads>) adsServiceImpl.getAllAds(title));
         return ResponseEntity.ok(ads);
@@ -60,28 +66,36 @@ public class AdsController {
     /**
      * Функция добавление объявления
      *
-     * @param properties характеристики объявления
-     * @param image      картинка объявления
+     * @param createAds      данные объявления
+     * @param image          картинка объявления
+     * @param authentication авторизованный пользователь
      * @return возвращает объект, содержащий данные созданного объявления
      */
     @Operation(
             summary = "Функция добавления объявления в базу данных",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "Добавление объявления в базу данных",
+                            responseCode = "201",
+                            description = "Созданное объявление",
                             content = @Content(
-                                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class)
                             )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Неавторизованный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Ads.class))
                     )
-
             }
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //POST http://localhost:8080/abs
-    public ResponseEntity<Ads> createAds(@RequestPart MultipartFile properties,
-                                         @RequestPart MultipartFile image) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Ads> createAds(@RequestPart("properties") @NotNull CreateAds createAds,
+                                         @RequestPart MultipartFile image,
+                                         @NonNull Authentication authentication) {
+        return ResponseEntity.ok(adsServiceImpl.createAds(createAds, image, authentication));
     }
 
     /**
@@ -102,6 +116,13 @@ public class AdsController {
                             )
                     ),
                     @ApiResponse(
+                            responseCode = "401",
+                            description = "Неавторизованный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Ads.class))
+                    ),
+                    @ApiResponse(
                             responseCode = "404",
                             description = "Объявление не найдено",
                             content = @Content(
@@ -111,9 +132,9 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping("{id}") //GET http://localhost:8080/abs/{id}
-    public ResponseEntity<FullAds> getAds(@PathVariable int id) {
-        return ResponseEntity.ok().build();
+    @GetMapping("/{id}") //GET http://localhost:8080/abs/{id}
+    public ResponseEntity<FullAds> getAds(@PathVariable Integer id) {
+        return ResponseEntity.ok(adsServiceImpl.getAds(id));
     }
 
     /**
@@ -125,25 +146,35 @@ public class AdsController {
             summary = "Удаление  объявления из базы данных по идентификатору (id)",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "Объявление удаленно",
+                            responseCode = "204",
+                            description = "Без содержания",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class)
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Объявление с таким id, не найдено",
+                            responseCode = "401",
+                            description = "Неавторизованный пользователь",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Запрещенный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = NewPassword.class)
+                            )
                     )
             }
     )
-    @DeleteMapping("{id}") //DELETE http://localhost:8080/abs/{id}
-    public ResponseEntity<Void> deleteAds(@PathVariable int id) {
-        return ResponseEntity.ok().build();
+    @DeleteMapping("/{id}") //DELETE http://localhost:8080/abs/{id}
+    public ResponseEntity<Void> deleteAds(Authentication authentication,
+                                          @PathVariable Integer id) {
+        adsServiceImpl.deleteAds(id, authentication);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
@@ -158,10 +189,25 @@ public class AdsController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Объявление обновлено",
+                            description = "ОК",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Неавторизованный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Ads.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Запрещенный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = NewPassword.class)
                             )
                     ),
                     @ApiResponse(
@@ -174,10 +220,11 @@ public class AdsController {
                     )
             }
     )
-    @PatchMapping("{id}") //PATCH http://localhost:8080/abs/{id}
+    @PatchMapping("/{id}") //PATCH http://localhost:8080/abs/{id}
     public ResponseEntity<Ads> updateAds(@PathVariable int id,
-                                         @RequestBody CreateAds createAds) {
-        return ResponseEntity.ok().build();
+                                         @RequestBody CreateAds createAds,
+                                         Authentication authentication) {
+        return ResponseEntity.ok(adsServiceImpl.updateAds(createAds, id, authentication));
     }
 
     /**
@@ -190,23 +237,22 @@ public class AdsController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Объявление найдено",
+                            description = "ОК",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class)
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Объявление не найдено",
+                            responseCode = "401",
+                            description = "Неавторизованный пользователь",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Ads.class)
-                            )
+                                    schema = @Schema(implementation = Ads.class))
                     )
             }
     )
-    @GetMapping("me") //GET http://localhost:8080/abs/me
+    @GetMapping("/me") //GET http://localhost:8080/abs/me
     public ResponseEntity<ResponseWrapperAds> getAdsMe() {
         return ResponseEntity.ok().build();
     }
@@ -223,25 +269,40 @@ public class AdsController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Картинка объявления обновлена",
+                            description = "ОК",
                             content = @Content(
-                                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Неавторизованный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Ads.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Запрещенный пользователь",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = NewPassword.class)
                             )
                     ),
                     @ApiResponse(
                             responseCode = "404",
                             description = "Объявление не найдено",
                             content = @Content(
-                                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = Ads.class))
                     )
             }
     )
-    @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //PATCH http://localhost:8080/abs/{id}/image
     public ResponseEntity<String> updateImage(@PathVariable int id,
-                                                 @RequestPart MultipartFile image) {
+                                              @RequestPart MultipartFile image) {
         return ResponseEntity.ok().build();
     }
 }

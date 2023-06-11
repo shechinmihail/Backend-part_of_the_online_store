@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
      * @param authentication авторизованный пользователь
      */
     @Override
-    public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
+    public void updateUserImage(MultipartFile image, Authentication authentication) {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
     }
 }
