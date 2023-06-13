@@ -12,7 +12,7 @@ import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
-import java.io.IOException;
+
 
 /**
  * UserServiceImpl

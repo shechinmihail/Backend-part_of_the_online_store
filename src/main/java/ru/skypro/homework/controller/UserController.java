@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 /**
- * UserController
+ * Контроллер UserController
  * Контроллер для обработки REST-запросов, добавление, удаление, редактирование и поиска пользователей
  *
  * @see
@@ -25,14 +26,19 @@ import ru.skypro.homework.dto.User;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("users")
+@RequestMapping("/users")
 public class UserController {
 
+    /**
+     * Поле сервиса пользователя
+     */
+    private final UserServiceImpl userServiceImpl;
 
     /**
      * Обновление пароля
      *
-     * @param newPassword новый пароль
+     * @param newPassword    новый пароль
+     * @param authentication авторизованный пользователь
      * @return новый пароль для авторизованного пользователя
      */
     @Operation(
@@ -64,7 +70,8 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword) {
+    public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
+        userServiceImpl.setNewPassword(newPassword, authentication);
         return ResponseEntity.ok().build();
     }
 
@@ -95,14 +102,16 @@ public class UserController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<?> getUser(@RequestBody Authentication authentication) {
+    public ResponseEntity<?> getUser(Authentication authentication) {
+        userServiceImpl.getUser(authentication);
         return ResponseEntity.ok().build();
     }
 
     /**
      * Обновить информацию об авторизованном пользователе
      *
-     * @param user пользователь
+     * @param user           пользователь
+     * @param authentication авторизованный пользователь
      * @return обновленную информацию об авторизованном пользователе
      */
     @Operation(
@@ -126,7 +135,8 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<?> updateUser(@RequestBody User user) {
+    public ResponseEntity<?> updateUser(@RequestBody User user, Authentication authentication) {
+        userServiceImpl.getUser(authentication);
         return ResponseEntity.ok().build();
     }
 

@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.List;
 
 /**
- * AdsController
+ * Контроллер AdsController
  * Контроллер для обработки REST-запросов, в данном случае добавления, удаления, редактирования и поиска объявлений
  *
  * @see
@@ -36,6 +38,11 @@ public class AdsController {
      * Поле сервиса объявлений
      */
     private final AdsServiceImpl adsServiceImpl;
+
+    /**
+     * Поле сервиса пользователя
+     */
+    private final UserServiceImpl userServiceImpl;
 
     /**
      * Функция получения всех объявлений, хранящихся в базе данных
@@ -230,6 +237,7 @@ public class AdsController {
     /**
      * Функция получения объявления авторизованного пользователя, хранящихся в базе данных
      *
+     * @param authentication авторизованный пользователь
      * @return возвращает объявление авторизованного пользователя
      */
     @Operation(
@@ -253,8 +261,10 @@ public class AdsController {
             }
     )
     @GetMapping("/me") //GET http://localhost:8080/abs/me
-    public ResponseEntity<ResponseWrapperAds> getAdsMe() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication authentication) {
+        Integer authorId = userServiceImpl.getUser(authentication).getId();
+        Collection adsEntity = adsServiceImpl.getAdsMe(authorId, authentication);
+        return ResponseEntity.ok((ResponseWrapperAds) adsEntity);
     }
 
     /**
