@@ -8,6 +8,8 @@ import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.entity.CommentEntity;
 
+import java.util.Collection;
+
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,componentModel = "spring")
 public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
@@ -19,4 +21,6 @@ public interface CommentMapper {
     CommentEntity toEntity(Comment commentDto);
 
     CommentEntity toEntity(CreateComment createComment);
+
+    Collection<Comment> commentToCollectionDto(Collection<CommentEntity> CommentCollection);
 }
