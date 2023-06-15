@@ -8,4 +8,10 @@ import java.util.List;
 public class ResponseWrapperComment {
     private int count;
     private List<Comment> results;
+
+
+    public ResponseWrapperComment(List<Comment> results) {
+        this.count = results.size();
+        this.results = results;
+    }
 }
