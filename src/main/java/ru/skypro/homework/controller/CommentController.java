@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.Comment;
+import ru.skypro.homework.dto.CreateComment;
 
 /**
  * CommentController
@@ -79,7 +81,7 @@ public class CommentController {
             }
     )
     @PostMapping("{id}/comments")
-    public ResponseEntity<?> addComment (@PathVariable int id) {
+    public ResponseEntity<?> addComment (@PathVariable int id, @RequestBody CreateComment createComment) {
         return ResponseEntity.ok().build();
     }
 
@@ -156,8 +158,9 @@ public class CommentController {
             }
     )
     @PatchMapping("{adId}/comments/{commentId}")
-    public ResponseEntity<?> addComment (@PathVariable int adId,
-                                         @PathVariable int commentId) {
+    public ResponseEntity<?> updateComment (@PathVariable int adId,
+                                         @PathVariable int commentId,
+                                            @RequestBody Comment comment) {
         return ResponseEntity.ok().build();
     }
 }
