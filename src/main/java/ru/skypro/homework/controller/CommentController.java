@@ -18,11 +18,11 @@ import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * CommentController
  * Контроллер для обработки REST-запросов, добавление, удаление, редактирование и поиска комментарии
+ *
  * @see
  */
 
@@ -37,6 +37,7 @@ public class CommentController {
 
     /**
      * Получить комментарии объявления
+     *
      * @param id идентификатор объявления, не может быть null
      * @return комментарии
      */
@@ -61,15 +62,15 @@ public class CommentController {
             }
     )
     @GetMapping("{id}/comments")
-    public ResponseEntity<ResponseWrapperComment> getComments (@PathVariable int id) {
-        ResponseWrapperComment comment = new ResponseWrapperComment((List< Comment >) commentService.getComments(id));
-        return ResponseEntity.ok(comment);
+    public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable int id) {
+        return ResponseEntity.ok(commentService.getComments(id));
     }
 
     /**
      * Добавить комментарий к объявлению
-     * @param id идентификатор объявления, не может быть null
-     * @param createComment данные комментария
+     *
+     * @param id             идентификатор объявления, не может быть null
+     * @param createComment  данные комментария
      * @param authentication авторизованный пользователь
      * @return возвращает объект, содержащий данные созданного комментария
      */
@@ -94,16 +95,17 @@ public class CommentController {
             }
     )
     @PostMapping("{id}/comments")
-    public ResponseEntity<Comment> addComment (@PathVariable int id,
-                                         @RequestPart("properties") @NotNull CreateComment createComment,
-                                         @NonNull Authentication authentication) {
+    public ResponseEntity<Comment> addComment(@PathVariable int id,
+                                              @RequestPart("properties") @NotNull CreateComment createComment,
+                                              @NonNull Authentication authentication) {
         return ResponseEntity.ok().build();
     }
 
     /**
      * Обновить комментарий
-     * @param commentId идентификатор комментария, не может быть null
-     * @param createComment обновленный комментарий
+     *
+     * @param commentId      идентификатор комментария, не может быть null
+     * @param comment        обновленный комментарий
      * @param authentication авторизованный пользователь
      * @return обновленный комментарий
      */
@@ -136,17 +138,18 @@ public class CommentController {
             }
     )
     @PatchMapping("{adId}/comments/{commentId}")
-    public ResponseEntity<Comment> updateComment (@PathVariable int commentId,
-                                            @RequestBody CreateComment createComment,
-                                            Authentication authentication) {
-        return ResponseEntity.ok(commentService.updateComment(commentId,createComment,authentication));
+    public ResponseEntity<Comment> updateComment(@PathVariable int adsId, @PathVariable int commentId,
+                                                 @RequestBody Comment comment,
+                                                 Authentication authentication) {
+        return ResponseEntity.ok(commentService.updateComment(adsId, commentId, comment, authentication));
     }
 
     /**
      * Удалить комментарий
-     * @param commentId идентификатор комментария, не может быть null
-     * @param  authentication авторизованный пользователь
      *
+     * @param commentId      идентификатор комментария, не может быть null
+     * @param adsId          идентификатор объявления, не может быть null
+     * @param authentication авторизованный пользователь
      */
     @Operation(
             summary = "Удалить комментарий",
@@ -177,9 +180,8 @@ public class CommentController {
             }
     )
     @DeleteMapping("{adId}/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment (@PathVariable int commentId,
-                                               Authentication authentication){
-        commentService.deleteComment(commentId,authentication);
+    public ResponseEntity<Void> deleteComment(@PathVariable int adsId, @PathVariable int commentId, Authentication authentication) {
+        commentService.deleteComment(adsId, commentId, authentication);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -14,7 +14,8 @@ import java.util.Collection;
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
     Collection<CommentEntity> getByAdsId(Integer adsId);
 
-    CommentEntity getById(Integer commentId);
-    void deleteById(Integer commentId);
+    CommentEntity getByIdAndAdsId(Integer adsId, Integer commentId);
+
+    void deleteByIdAndAdsId(Integer adsId, Integer commentId);
 
 }
