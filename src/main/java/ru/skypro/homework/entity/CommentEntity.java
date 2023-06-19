@@ -21,17 +21,17 @@ public class CommentEntity {
     @Column(name = "id")
     private Integer id;
 
-//    /**
-//     * Идентификационный номер (id) объявления
-//     */
-//    @Column(name = "ads_id")
-//    private Integer pk;                           по моему это лишнее
+    /**
+    * объявление
+    */
+    @ManyToOne
+    private AdsEntity ad;
 
     /**
-     * Идентификационный номер (id) автора
+     * автор
      */
-    @Column(name = "author_id")
-    private Integer author;
+    @ManyToOne
+    private UserEntity author;
 
     /**
      * Текст комментария
