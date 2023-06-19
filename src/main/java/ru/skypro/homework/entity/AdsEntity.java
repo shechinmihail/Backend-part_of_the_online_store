@@ -25,7 +25,7 @@ public class AdsEntity {
     private String description;
 
     /**
-     * Цена товара в объявлении
+     * Цена объявления
      */
     private int price;
 
@@ -42,10 +42,10 @@ public class AdsEntity {
     private UserEntity author;
 
     /**
-     * Изображение объявления
+     * Ссылка на картинку объявления
      */
     @OneToOne
     @JoinColumn(name = "image_id")
-    private Image image;
+    private ImageEntity imageEntity;
 
 }

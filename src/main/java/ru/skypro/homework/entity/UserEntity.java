@@ -8,7 +8,7 @@ import javax.persistence.*;
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
- * Класс User, представляет сущность пользователя
+ * Класс UserEntity, представляет сущность пользователя
  */
 @Entity
 @Data
@@ -33,7 +33,7 @@ public class UserEntity {
     private String lastName;
 
     /**
-     * Номер телефона пользователя
+     * Телефон пользователя
      */
     private String phone;
 
@@ -54,9 +54,9 @@ public class UserEntity {
     private String email;
 
     /**
-     * Изображение пользователя
+     * Ссылка на изображение пользователя
      */
     @OneToOne
     @JoinColumn(name = "image_id")
-    private Image image;
+    private ImageEntity imageEntity;
 }

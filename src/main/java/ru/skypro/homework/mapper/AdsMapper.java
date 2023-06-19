@@ -11,10 +11,11 @@ import ru.skypro.homework.entity.AdsEntity;
 
 import java.util.Collection;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AdsMapper {
 
     AdsMapper INSTANCE = Mappers.getMapper(AdsMapper.class);
+
 
     @Mapping(target = "author.id", source = "author")
     @Mapping(target = "id", source = "pk")

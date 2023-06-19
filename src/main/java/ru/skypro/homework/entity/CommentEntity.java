@@ -27,6 +27,7 @@ public class CommentEntity {
     @ManyToOne
     private AdsEntity ad;
 
+
     /**
      * автор
      */

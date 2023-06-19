@@ -7,12 +7,12 @@ import javax.persistence.*;
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
- * Класс Image, представляет сущность изображения пользователя
+ * Класс ImageEntity, представляет сущность изображении
  */
 @Entity
 @Data
 @Table(name = "image")
-public class Image {
+public class ImageEntity {
 
     /**
      * Идентификационный номер (id) изображения
