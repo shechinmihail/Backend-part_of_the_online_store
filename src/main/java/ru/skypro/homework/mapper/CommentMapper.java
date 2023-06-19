@@ -2,26 +2,39 @@ package ru.skypro.homework.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.entity.CommentEntity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
-import java.util.List;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
+
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,componentModel = "spring")
+
 public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
+    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "timeMapping")
     @Mapping(source = "id", target = "pk")
+    @Mapping(source = "author.id", target = "author")
+    @Mapping(target = "authorImage", defaultValue = "null")
+    @Mapping(source = "author.firstName", target = "authorFirstName")
     Comment toDto(CommentEntity commentEntity);
-
-    @Mapping(source = "pk", target = "id")
-    CommentEntity toEntity(Comment commentDto);
 
     CommentEntity toEntity(CreateComment createComment);
 
-    List<Comment> commentToCollectionDto(Collection<CommentEntity> commentCollection);
+    Collection<Comment> commentsEntityToCommentsDtoCollection(Collection<CommentEntity> commentEntityCollection);
+
+    @Named("timeMapping")
+    default Long time(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return 0L;
+        }
+        return localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
 }

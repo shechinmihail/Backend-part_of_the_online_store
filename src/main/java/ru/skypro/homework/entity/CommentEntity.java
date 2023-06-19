@@ -22,16 +22,17 @@ public class CommentEntity {
     private Integer id;
 
     /**
-     * Идентификационный номер (id) объявления
-     */
-    @Column(name = "ads_id")
-    private Integer adsId;
+    * объявление
+    */
+    @ManyToOne
+    private AdsEntity ad;
+
 
     /**
-     * Идентификационный номер (id) автора
+     * автор
      */
-    @Column(name = "author_id")
-    private Integer author;
+    @ManyToOne
+    private UserEntity author;
 
     /**
      * Текст комментария
