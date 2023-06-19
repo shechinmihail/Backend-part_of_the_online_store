@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.dto.ResponseWrapperComment;
+import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.AdsRepository;
@@ -75,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
         logger.info("Вызван метод получения всех комментариев к определенному объявлению");
         Collection<CommentEntity> comments = commentRepository.getByAdsId(adsId);
         ResponseWrapperComment responseWrapperComment = new ResponseWrapperComment();
-        responseWrapperComment.setResults(commentMapper.commentToCollectionDto(comments));
+        responseWrapperComment.setResults(commentMapper.commentsEntityToCommentsDtoCollection(comments));
         return responseWrapperComment;
     }
 
@@ -83,18 +85,19 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет добавить комментарий к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param adsId          идентификатор объявления, не может быть null
+     * @param ad           объявление, не может быть null
      * @param createComment  создание текста комментария
      * @param authentication авторизованный пользователь
      * @return возвращает добавленный комментарий
      */
     @Override
-    public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
+    public Comment addComment(@NotNull AdsEntity ad, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
         CommentEntity commentEntity = CommentMapper.INSTANCE.toEntity(createComment);
-        commentEntity.setAdsId(adsId);
+        commentEntity.setAd(ad);
         commentEntity.setCreatedAt(LocalDateTime.now());
-        commentEntity.setAuthor(userRepository.getUserEntitiesByEmail(authentication.getName()).getId());
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        commentEntity.setAuthor(userRepository.getUserEntitiesByEmail(userDetails.getUsername()));
         commentRepository.save(commentEntity);
 
         return CommentMapper.INSTANCE.toDto(commentEntity);

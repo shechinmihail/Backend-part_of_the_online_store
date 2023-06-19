@@ -12,6 +12,7 @@ import ru.skypro.homework.entity.CommentEntity;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
+import java.util.List;
 
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,componentModel = "spring")
@@ -28,7 +29,7 @@ public interface CommentMapper {
 
     CommentEntity toEntity(CreateComment createComment);
 
-    Collection<Comment> commentsEntityToCommentsDtoCollection(Collection<CommentEntity> commentEntityCollection);
+    List<Comment> commentsEntityToCommentsDtoCollection(Collection<CommentEntity> commentEntityCollection);
 
     @Named("timeMapping")
     default Long time(LocalDateTime localDateTime) {

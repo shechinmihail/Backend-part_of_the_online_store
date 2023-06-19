@@ -56,9 +56,9 @@ public class AdsServiceImpl implements AdsService {
     public Collection<Ads> getAllAds(String title) {
         logger.info("Вызван метод получения всех объявлений");
         if (title == null) {
-            return AdsMapper.INSTANCE.adsToCollectionDto(adsRepository.findAll());
+            return AdsMapper.INSTANCE.adsEntityToCollectionDto(adsRepository.findAll());
         }
-        return AdsMapper.INSTANCE.adsToCollectionDto(adsRepository.findByTitleLikeIgnoreCase(title));
+        return AdsMapper.INSTANCE.adsEntityToCollectionDto(adsRepository.findByTitleLikeIgnoreCase(title));
     }
 
     /**
@@ -78,7 +78,7 @@ public class AdsServiceImpl implements AdsService {
         AdsEntity adsEntity = AdsMapper.INSTANCE.toEntity(createAds);
         adsRepository.save(adsEntity);
 
-        return AdsMapper.INSTANCE.toDto(adsEntity);
+        return AdsMapper.INSTANCE.toAdsDto(adsEntity);
     }
 
     /**
@@ -90,7 +90,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAds getAds(Integer adsId) {
         logger.info("Вызван метод получения объявления по идентификатору (id)");
-        return AdsMapper.INSTANCE.adToFullAdsDto(adsRepository.findById(adsId).orElseThrow());
+        return AdsMapper.INSTANCE.toFullAdsDto(adsRepository.findById(adsId).orElseThrow());
     }
 
     /**
@@ -122,7 +122,7 @@ public class AdsServiceImpl implements AdsService {
         AdsEntity adsEntity = AdsMapper.INSTANCE.toEntity(createAds);
         adsRepository.save(adsEntity);
 
-        return AdsMapper.INSTANCE.toDto(adsEntity);
+        return AdsMapper.INSTANCE.toAdsDto(adsEntity);
     }
 
     /**
@@ -136,7 +136,7 @@ public class AdsServiceImpl implements AdsService {
     public Collection<Ads> getAdsMe(Integer authorId, Authentication authentication) {
         logger.info("Вызван метод получения объявлений авторизованного пользователя");
         Collection<AdsEntity> AdsEntity = adsRepository.findByAuthorId(authorId);
-        return AdsMapper.INSTANCE.adsToCollectionDto(AdsEntity);
+        return AdsMapper.INSTANCE.adsEntityToCollectionDto(AdsEntity);
     }
 
     /**
