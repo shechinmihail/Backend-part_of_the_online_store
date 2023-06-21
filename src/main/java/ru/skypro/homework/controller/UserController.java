@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
-import ru.skypro.homework.service.impl.UserServiceImpl;
+import ru.skypro.homework.service.UserService;
 
 /**
  * Контроллер UserController
@@ -32,7 +32,7 @@ public class UserController {
     /**
      * Поле сервиса пользователя
      */
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     /**
      * Обновление пароля
@@ -71,7 +71,7 @@ public class UserController {
     )
     @PostMapping("/set_password")
     public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
-        userServiceImpl.setNewPassword(newPassword, authentication);
+        userService.setNewPassword(newPassword, authentication);
         return ResponseEntity.ok().build();
     }
 
@@ -103,7 +103,7 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<?> getUser(Authentication authentication) {
-        userServiceImpl.getUser(authentication);
+        userService.getUser(authentication);
         return ResponseEntity.ok().build();
     }
 
@@ -136,7 +136,7 @@ public class UserController {
     )
     @PatchMapping("/me")
     public ResponseEntity<?> updateUser(@RequestBody User user, Authentication authentication) {
-        userServiceImpl.getUser(authentication);
+        userService.getUser(authentication);
         return ResponseEntity.ok().build();
     }
 

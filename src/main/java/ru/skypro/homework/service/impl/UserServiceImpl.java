@@ -13,7 +13,6 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
 
-
 /**
  * UserServiceImpl
  * Сервис для обновления пароля, информации, аватара и поиска авторизованного пользователя в базе данных
@@ -68,7 +67,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(Authentication authentication) {
         logger.info("Вызван метод получения информации об авторизованном пользователе");
-        return UserMapper.INSTANCE.toDto(userRepository.getUserEntitiesByEmail(authentication.getName()));
+        return userMapper.toDto(userRepository.getUserEntitiesByEmail(authentication.getName()));
     }
 
     /**

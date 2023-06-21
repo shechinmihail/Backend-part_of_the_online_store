@@ -15,6 +15,6 @@ public interface AdsService {
     FullAds getAds(Integer adsId);
     void deleteAds(Integer adsId, Authentication authentication);
     Ads updateAds(CreateAds createAds, Integer adsId, Authentication authentication);
-    Collection<Ads> getAdsMe(Integer userId, Authentication authentication);
+    Collection<Ads> getAdsMe(Authentication authentication);
     String updateImage(Integer adsId,MultipartFile image, Authentication authentication);
 }

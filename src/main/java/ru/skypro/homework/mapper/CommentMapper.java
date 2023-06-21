@@ -15,10 +15,9 @@ import java.util.Collection;
 import java.util.List;
 
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,componentModel = "spring")
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 
 public interface CommentMapper {
-    CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
     @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "timeMapping")
     @Mapping(source = "id", target = "pk")

@@ -2,14 +2,15 @@ package ru.skypro.homework.dto;
 
 import lombok.Data;
 
+import java.util.Collection;
 import java.util.List;
 
 @Data
-public class ResponseWrapperAds {
+public class ResponseWrapperAds<T> {
     private int count;
-    private List<Ads> results;
+    private Collection<T> results;
 
-    public ResponseWrapperAds(List<Ads> results) {
+    public ResponseWrapperAds(Collection<T> results) {
         this.count = results.size();
         this.results = results;
     }

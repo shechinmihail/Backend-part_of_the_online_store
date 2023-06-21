@@ -14,8 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.service.impl.AdsServiceImpl;
-import ru.skypro.homework.service.impl.UserServiceImpl;
+import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
@@ -37,12 +37,12 @@ public class AdsController {
     /**
      * Поле сервиса объявлений
      */
-    private final AdsServiceImpl adsServiceImpl;
+    private final AdsService adsService;
 
     /**
      * Поле сервиса пользователя
      */
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     /**
      * Функция получения всех объявлений, хранящихся в базе данных
@@ -65,8 +65,8 @@ public class AdsController {
 
     )
     @GetMapping(path = "/all")  //GET http://localhost:8080/abs/all
-    public ResponseEntity<ResponseWrapperAds> getAllAds(@RequestParam(required = false) String title) {
-        ResponseWrapperAds ads = new ResponseWrapperAds((List<Ads>) adsServiceImpl.getAllAds(title));
+    public ResponseEntity<ResponseWrapperAds<Ads>> getAllAds(@RequestParam(required = false) String title) {
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAllAds(title));
         return ResponseEntity.ok(ads);
     }
 
@@ -102,7 +102,7 @@ public class AdsController {
     public ResponseEntity<Ads> createAds(@RequestPart("properties") @NotNull CreateAds createAds,
                                          @RequestPart MultipartFile image,
                                          @NonNull Authentication authentication) {
-        return ResponseEntity.ok(adsServiceImpl.createAds(createAds, image, authentication));
+        return ResponseEntity.ok(adsService.createAds(createAds, image, authentication));
     }
 
     /**
@@ -141,7 +141,7 @@ public class AdsController {
     )
     @GetMapping("/{id}") //GET http://localhost:8080/abs/{id}
     public ResponseEntity<FullAds> getAds(@PathVariable Integer id) {
-        return ResponseEntity.ok(adsServiceImpl.getAds(id));
+        return ResponseEntity.ok(adsService.getAds(id));
     }
 
     /**
@@ -180,7 +180,7 @@ public class AdsController {
     @DeleteMapping("/{id}") //DELETE http://localhost:8080/abs/{id}
     public ResponseEntity<Void> deleteAds(Authentication authentication,
                                           @PathVariable Integer id) {
-        adsServiceImpl.deleteAds(id, authentication);
+        adsService.deleteAds(id, authentication);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -231,7 +231,7 @@ public class AdsController {
     public ResponseEntity<Ads> updateAds(@PathVariable int id,
                                          @RequestBody CreateAds createAds,
                                          Authentication authentication) {
-        return ResponseEntity.ok(adsServiceImpl.updateAds(createAds, id, authentication));
+        return ResponseEntity.ok(adsService.updateAds(createAds, id, authentication));
     }
 
     /**
@@ -261,10 +261,9 @@ public class AdsController {
             }
     )
     @GetMapping("/me") //GET http://localhost:8080/abs/me
-    public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication authentication) {
-        Integer authorId = userServiceImpl.getUser(authentication).getId();
-        Collection adsEntity = adsServiceImpl.getAdsMe(authorId, authentication);
-        return ResponseEntity.ok((ResponseWrapperAds) adsEntity);
+    public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe(Authentication authentication) {
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe(authentication));
+        return ResponseEntity.ok(ads);
     }
 
     /**

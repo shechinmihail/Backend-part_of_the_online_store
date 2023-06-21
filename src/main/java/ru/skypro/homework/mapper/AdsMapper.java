@@ -14,19 +14,16 @@ import java.util.Collection;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AdsMapper {
 
-    AdsMapper INSTANCE = Mappers.getMapper(AdsMapper.class);
-
-
-    @Mapping(target = "author.id", source = "author")
-    @Mapping(target = "id", source = "pk")
+    @Mapping(target = "author", source = "author.id")
+    @Mapping(target = "pk", source = "id")
     @Mapping(target = "image", defaultValue = "null")
     Ads toAdsDto(AdsEntity adsEntity);
 
-    @Mapping(source = "id",target = "pk")
-    @Mapping(source = "author.firstName",target = "authorFirstName")
-    @Mapping(source = "author.lastName",target = "authorLastName")
-    @Mapping(source = "author.email",target = "email")
-    @Mapping(source = "author.phone",target = "phone")
+    @Mapping(source = "id", target = "pk")
+    @Mapping(source = "author.firstName", target = "authorFirstName")
+    @Mapping(source = "author.lastName", target = "authorLastName")
+    @Mapping(source = "author.email", target = "email")
+    @Mapping(source = "author.phone", target = "phone")
     @Mapping(target = "image", defaultValue = "null")
     FullAds toFullAdsDto(AdsEntity adsEntity);
 

@@ -13,6 +13,7 @@ import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.UserService;
 
 import java.util.Collection;
 
@@ -31,20 +32,32 @@ public class AdsServiceImpl implements AdsService {
     private final AdsRepository adsRepository;
 
     /**
+     * Поле маппинга объявлении
+     */
+    private AdsMapper adsMapper;
+
+    /**
      * Поле репозитория пользователя
      */
     private final UserRepository userRepository;
+
+    /**
+     * Поле сервиса пользователя
+     */
+    private final UserService userService;
 
     /**
      * Конструктор - создание нового объекта репозитория
      *
      * @param adsRepository  репозиторий объявления
      * @param userRepository репозиторий пользователя
+     * @param userService сервис пользователя
      * @see AdsRepository(AdsRepository)
      */
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, UserService userService) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     /**
@@ -56,9 +69,9 @@ public class AdsServiceImpl implements AdsService {
     public Collection<Ads> getAllAds(String title) {
         logger.info("Вызван метод получения всех объявлений");
         if (title == null) {
-            return AdsMapper.INSTANCE.adsEntityToCollectionDto(adsRepository.findAll());
+            return adsMapper.adsEntityToCollectionDto(adsRepository.findAll());
         }
-        return AdsMapper.INSTANCE.adsEntityToCollectionDto(adsRepository.findByTitleLikeIgnoreCase(title));
+        return adsMapper.adsEntityToCollectionDto(adsRepository.findByTitleLikeIgnoreCase(title));
     }
 
     /**
@@ -72,13 +85,10 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication) {
         logger.info("Вызван метод добавления объявления");
-        if (createAds == null) {
-            throw new RuntimeException("");
-        }
-        AdsEntity adsEntity = AdsMapper.INSTANCE.toEntity(createAds);
+        AdsEntity adsEntity = adsMapper.toEntity(createAds);
         adsRepository.save(adsEntity);
 
-        return AdsMapper.INSTANCE.toAdsDto(adsEntity);
+        return adsMapper.toAdsDto(adsEntity);
     }
 
     /**
@@ -90,7 +100,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAds getAds(Integer adsId) {
         logger.info("Вызван метод получения объявления по идентификатору (id)");
-        return AdsMapper.INSTANCE.toFullAdsDto(adsRepository.findById(adsId).orElseThrow());
+        return adsMapper.toFullAdsDto(adsRepository.findById(adsId).orElseThrow());
     }
 
     /**
@@ -115,28 +125,23 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId, Authentication authentication) {
-        logger.info("Вызван метод обновления объявления по идентификатору (id)");
-        if (adsId == null || !adsRepository.findById(adsId).isPresent()) {
-            return null;
-        }
-        AdsEntity adsEntity = AdsMapper.INSTANCE.toEntity(createAds);
+        AdsEntity adsEntity = adsMapper.toEntity(createAds);
         adsRepository.save(adsEntity);
 
-        return AdsMapper.INSTANCE.toAdsDto(adsEntity);
+        return adsMapper.toAdsDto(adsEntity);
     }
 
     /**
      * Получение объявлений авторизованного пользователя, хранящихся в базе данных
      *
-     * @param authorId       идентификатор пользователя, не может быть null
      * @param authentication авторизованный пользователь
      * @return возвращает все объявления авторизованного пользователя
      */
     @Override
-    public Collection<Ads> getAdsMe(Integer authorId, Authentication authentication) {
+    public Collection<Ads> getAdsMe(Authentication authentication) {
         logger.info("Вызван метод получения объявлений авторизованного пользователя");
-        Collection<AdsEntity> AdsEntity = adsRepository.findByAuthorId(authorId);
-        return AdsMapper.INSTANCE.adsEntityToCollectionDto(AdsEntity);
+        Collection<AdsEntity> AdsEntity = adsRepository.findByAuthorId(userService.getUser(authentication).getId());
+        return adsMapper.adsEntityToCollectionDto(AdsEntity);
     }
 
     /**

@@ -85,22 +85,22 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет добавить комментарий к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param ad           объявление, не может быть null
+     * @param adsId идентификатор объявления, не может быть null
      * @param createComment  создание текста комментария
      * @param authentication авторизованный пользователь
      * @return возвращает добавленный комментарий
      */
     @Override
-    public Comment addComment(@NotNull AdsEntity ad, CreateComment createComment, Authentication authentication) {
+    public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
-        CommentEntity commentEntity = CommentMapper.INSTANCE.toEntity(createComment);
-        commentEntity.setAd(ad);
+        Integer userId = userRepository.getUserEntitiesByEmail(authentication.getName()).getId();
+        CommentEntity commentEntity = commentMapper.toEntity(createComment);
+        commentEntity.setAdsId(adsId);
+        commentEntity.setAuthor(userId);
         commentEntity.setCreatedAt(LocalDateTime.now());
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        commentEntity.setAuthor(userRepository.getUserEntitiesByEmail(userDetails.getUsername()));
         commentRepository.save(commentEntity);
 
-        return CommentMapper.INSTANCE.toDto(commentEntity);
+        return commentMapper.toDto(commentEntity);
     }
 
     /**
@@ -132,6 +132,6 @@ public class CommentServiceImpl implements CommentService {
         CommentEntity updateCommentEntity = commentRepository.getByIdAndAdsId(adsId, commentId);
         updateCommentEntity.setText(comment.getText());
         commentRepository.save(updateCommentEntity);
-        return commentMapper.INSTANCE.toDto(updateCommentEntity);
+        return commentMapper.toDto(updateCommentEntity);
     }
 }

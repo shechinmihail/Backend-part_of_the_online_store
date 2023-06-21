@@ -22,16 +22,6 @@ public class ImageEntity {
     private Integer id;
 
     /**
-     * Путь к изображению
-     */
-    private String filePath;
-
-    /**
-     * Размер изображения
-     */
-    private long fileSize;
-
-    /**
      * Тип изображения
      */
     private String mediaType;
