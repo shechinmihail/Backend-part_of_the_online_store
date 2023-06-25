@@ -102,9 +102,8 @@ public class UserController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<?> getUser(Authentication authentication) {
-        userService.getUser(authentication);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<User> getUser(Authentication authentication) {
+        return ResponseEntity.ok(userService.getUser(authentication));
     }
 
     /**
@@ -135,9 +134,8 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<?> updateUser(@RequestBody User user, Authentication authentication) {
-        userService.getUser(authentication);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<User> updateUser(@RequestBody User user, Authentication authentication) {
+        return ResponseEntity.ok(userService.updateUser(user, authentication));
     }
 
     /**

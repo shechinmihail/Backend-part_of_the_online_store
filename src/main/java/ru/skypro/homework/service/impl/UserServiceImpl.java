@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();// надо сделать исключение
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setPhone(user.getPhone());
