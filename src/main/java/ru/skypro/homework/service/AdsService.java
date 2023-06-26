@@ -13,8 +13,8 @@ public interface AdsService {
     Collection<Ads> getAllAds(String title);
     Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication);
     FullAds getAds(Integer adsId);
-    void deleteAds(Integer adsId, Authentication authentication);
-    Ads updateAds(CreateAds createAds, Integer adsId, Authentication authentication);
+    void deleteAds(Integer adsId);
+    Ads updateAds(CreateAds createAds, Integer adsId);
     Collection<Ads> getAdsMe(Authentication authentication);
-    String updateImage(Integer adsId,MultipartFile image, Authentication authentication);
+    String updateImage(Integer adsId, MultipartFile image);
 }

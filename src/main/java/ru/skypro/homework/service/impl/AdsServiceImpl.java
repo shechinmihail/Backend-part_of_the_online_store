@@ -8,13 +8,19 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.AdsEntity;
+import ru.skypro.homework.entity.ImageEntity;
+import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.AdsMapper;
+import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -34,7 +40,7 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Поле маппинга объявлении
      */
-    private AdsMapper adsMapper;
+    private final AdsMapper adsMapper;
 
     /**
      * Поле репозитория пользователя
@@ -45,19 +51,26 @@ public class AdsServiceImpl implements AdsService {
      * Поле сервиса пользователя
      */
     private final UserService userService;
+    private final ImageService imageService;
+
 
     /**
      * Конструктор - создание нового объекта репозитория
      *
      * @param adsRepository  репозиторий объявления
+     * @param adsMapper
      * @param userRepository репозиторий пользователя
-     * @param userService сервис пользователя
+     * @param userService    сервис пользователя
+     * @param userMapper
+     * @param imageService
      * @see AdsRepository(AdsRepository)
      */
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, UserService userService) {
+    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService, UserMapper userMapper, ImageService imageService) {
         this.adsRepository = adsRepository;
+        this.adsMapper = adsMapper;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.imageService = imageService;
     }
 
     /**
@@ -69,6 +82,7 @@ public class AdsServiceImpl implements AdsService {
     public Collection<Ads> getAllAds(String title) {
         logger.info("Вызван метод получения всех объявлений");
         if (title == null) {
+
             return adsMapper.adsEntityToCollectionDto(adsRepository.findAll());
         }
         return adsMapper.adsEntityToCollectionDto(adsRepository.findByTitleLikeIgnoreCase(title));
@@ -84,8 +98,24 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication) {
+        if (createAds.getPrice() < 0) {
+            throw new IllegalArgumentException("Цена должна быть больше 0!");
+        }
+
         logger.info("Вызван метод добавления объявления");
+
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).get();
+        adsEntity.setAuthor(author);
+
+        ImageEntity adImage;
+        try {
+            adImage = imageService.downloadImage(image);
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при загрузке фото");
+        }
+
+        adsEntity.setImageEntity(adImage);
         adsRepository.save(adsEntity);
 
         return adsMapper.toAdsDto(adsEntity);
@@ -107,10 +137,9 @@ public class AdsServiceImpl implements AdsService {
      * Удаление объявления по идентификатору (id), хранящихся в базе данных
      *
      * @param adsId          идентификатор объявления, не может быть null
-     * @param authentication авторизованный пользователь
      */
     @Override
-    public void deleteAds(Integer adsId, Authentication authentication) {
+    public void deleteAds(Integer adsId) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
         adsRepository.deleteById(adsId);
     }
@@ -120,15 +149,26 @@ public class AdsServiceImpl implements AdsService {
      *
      * @param adsId          идентификатор объявления, не может быть null
      * @param createAds      данные объявления
-     * @param authentication авторизованный пользователь
      * @return возвращает обновленное объявление по идентификатору (id)
      */
     @Override
-    public Ads updateAds(CreateAds createAds, Integer adsId, Authentication authentication) {
-        AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        adsRepository.save(adsEntity);
+    public Ads updateAds(CreateAds createAds, Integer adsId) {
+        if (adsId == null || adsRepository.findById(adsId).isEmpty()) {
+            throw new RuntimeException("Такого объявления не существует!");
+        }
 
-        return adsMapper.toAdsDto(adsEntity);
+        if (createAds.getPrice() < 0) {
+            throw new RuntimeException("Цена должна быть больше 0!");
+        }
+
+        AdsEntity updateAd = adsRepository.findById(adsId).get();
+        updateAd.setTitle(createAds.getTitle());
+        updateAd.setPrice(createAds.getPrice());
+        updateAd.setDescription(createAds.getDescription());
+
+        adsRepository.save(updateAd);
+
+        return adsMapper.toAdsDto(updateAd);
     }
 
     /**
@@ -149,12 +189,28 @@ public class AdsServiceImpl implements AdsService {
      *
      * @param adsId          идентификатор объявления, не может быть null
      * @param image          картинка объявления
-     * @param authentication авторизованный пользователь
      * @return объявление с новой картинкой
      */
     @Override
-    public String updateImage(Integer adsId, MultipartFile image, Authentication authentication) {
+    public String updateImage(Integer adsId, MultipartFile image) {
         logger.info("Вызван метод обновления картинки объявления");
-        return null;
+        if (adsId == null || adsRepository.findById(adsId).isEmpty()) {
+            throw new RuntimeException("Такого объявления не существует!");
+        }
+
+        ImageEntity adImage;
+        try {
+            adImage = imageService.downloadImage(image);
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при загрузке фото");
+        }
+
+        int imageId = adImage.getId();
+        imageService.deleteImage(imageId);
+
+        AdsEntity ad = adsRepository.findById(adsId).get();
+        ad.setImageEntity(adImage);
+        adsRepository.save(ad);
+        return adsMapper.toAdsDto(ad).getImage(); //TODO нужно в маппере сделать создание ссылки изображения
     }
 }

@@ -15,6 +15,8 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.service.UserService;
 
+import java.io.IOException;
+
 /**
  * Контроллер UserController
  * Контроллер для обработки REST-запросов, добавление, удаление, редактирование и поиска пользователей
@@ -165,7 +167,8 @@ public class UserController {
             }
     )
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image) {
+    public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image, Authentication authentication) throws IOException {
+        userService.updateUserImage(image, authentication);
         return ResponseEntity.ok().build();
     }
 }
