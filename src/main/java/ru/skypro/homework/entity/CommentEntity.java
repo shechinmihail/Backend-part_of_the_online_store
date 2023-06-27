@@ -34,7 +34,7 @@ public class CommentEntity {
      */
     @ManyToOne
     @JoinColumn(name = "author_id")
-    private UserEntity author; // изменить на юзера
+    private UserEntity author;
 
     /**
      * Текст комментария
