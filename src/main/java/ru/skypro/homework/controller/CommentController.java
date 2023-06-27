@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.dto.ResponseWrapperComment;
-import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.service.CommentService;
 
 
@@ -69,7 +68,7 @@ public class CommentController {
     /**
      * Добавить комментарий к объявлению
      *
-     * @param ad             объявление, не может быть null
+     * @param adsId          объявление, не может быть null
      * @param createComment  данные комментария
      * @param authentication авторизованный пользователь
      * @return возвращает объект, содержащий данные созданного комментария
