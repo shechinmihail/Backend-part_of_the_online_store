@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.entity.CommentEntity;
@@ -16,7 +17,7 @@ import java.util.List;
 
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
-
+@Component
 public interface CommentMapper {
 
     @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "timeMapping")

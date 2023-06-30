@@ -38,7 +38,7 @@ public class AdsEntity {
      *  Автор объявления
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "author_id")
     private UserEntity author;
 
     /**

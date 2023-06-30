@@ -9,6 +9,7 @@ import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.CommentEntity;
+import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
@@ -47,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
     /**
      * Поле маппинга комментариев
      */
-    private CommentMapper commentMapper;
+    private final CommentMapper commentMapper;
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -55,12 +56,14 @@ public class CommentServiceImpl implements CommentService {
      * @param commentRepository репозиторий комментариев
      * @param adsRepository     репозиторий объявлений
      * @param userRepository    репозиторий пользователя
+     * @param commentMapper
      * @see CommentRepository (CommentRepository)
      */
-    public CommentServiceImpl(CommentRepository commentRepository, AdsRepository adsRepository, UserRepository userRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, AdsRepository adsRepository, UserRepository userRepository, CommentMapper commentMapper) {
         this.commentRepository = commentRepository;
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
+        this.commentMapper = commentMapper;
     }
 
     /**
@@ -91,10 +94,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
-        Integer userId = userRepository.getUserEntitiesByEmail(authentication.getName()).getId();
         CommentEntity commentEntity = commentMapper.toEntity(createComment);
-        commentEntity.setAdsId(adsId);
-        commentEntity.setAuthor(userId);
+        AdsEntity adsEntity = adsRepository.findById(adsId).get();
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).get();
+        commentEntity.setAd(adsEntity);
+        commentEntity.setAuthor(author);
         commentEntity.setCreatedAt(LocalDateTime.now());
         commentRepository.save(commentEntity);
 
@@ -109,7 +113,7 @@ public class CommentServiceImpl implements CommentService {
      * @param adsId     идентификатор объявления, не может быть null
      */
     @Override
-    public void deleteComment(Integer adsId, Integer commentId, Authentication authentication) {
+    public void deleteComment(Integer adsId, Integer commentId) {
         logger.info("Вызван метод удаления комментария по идентификатору (id)");
         commentRepository.deleteByIdAndAdsId(adsId, commentId);
     }
@@ -121,11 +125,10 @@ public class CommentServiceImpl implements CommentService {
      *
      * @param commentId      идентификатор комментария, не может быть null
      * @param comment        измененный комментарий
-     * @param authentication авторизованный пользователь
      * @return возвращает измененный комментарий
      */
     @Override
-    public Comment updateComment(Integer adsId, @NotNull Integer commentId, Comment comment, Authentication authentication) {
+    public Comment updateComment(Integer adsId, @NotNull Integer commentId, Comment comment) {
         logger.info("Вызван метод обновления комментария по идентификатору (id)");
         CommentEntity updateCommentEntity = commentRepository.getByIdAndAdsId(adsId, commentId);
         updateCommentEntity.setText(comment.getText());

@@ -68,7 +68,7 @@ public class CommentController {
     /**
      * Добавить комментарий к объявлению
      *
-     * @param adsId          объявление, не может быть null
+     * @param adsId            Id объявление, не может быть null
      * @param createComment  данные комментария
      * @param authentication авторизованный пользователь
      * @return возвращает объект, содержащий данные созданного комментария

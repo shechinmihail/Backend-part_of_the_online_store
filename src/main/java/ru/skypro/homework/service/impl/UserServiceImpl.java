@@ -7,10 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
+import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
+
+import java.io.IOException;
 
 
 /**
@@ -30,16 +33,22 @@ public class UserServiceImpl implements UserService {
     /**
      * Поле маппинга пользователя
      */
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+
+    private final ImageServiceImpl imageService;
 
     /**
      * Конструктор - создание нового объекта репозитория
      *
      * @param userRepository
+     * @param userMapper
+     * @param imageService
      * @see UserRepository (UserRepository)
      */
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.imageService = imageService;
     }
 
     /**
@@ -80,7 +89,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();//TODO надо сделать исключение
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setPhone(user.getPhone());
@@ -95,7 +104,11 @@ public class UserServiceImpl implements UserService {
      * @param authentication авторизованный пользователь
      */
     @Override
-    public void updateUserImage(MultipartFile image, Authentication authentication) {
+    public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
+        ImageEntity imageEntity = imageService.downloadImage(image);
+        userEntity.setImageEntity(imageEntity);
+        userRepository.save(userEntity);
     }
 }

@@ -40,11 +40,6 @@ public class AdsController {
     private final AdsService adsService;
 
     /**
-     * Поле сервиса пользователя
-     */
-    private final UserService userService;
-
-    /**
      * Функция получения всех объявлений, хранящихся в базе данных
      *
      * @param title заголовок объявления
@@ -66,7 +61,8 @@ public class AdsController {
     )
     @GetMapping(path = "/all")  //GET http://localhost:8080/abs/all
     public ResponseEntity<ResponseWrapperAds<Ads>> getAllAds(@RequestParam(required = false) String title) {
-        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAllAds(title));
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>();
+        ads.setResults((List<Ads>) adsService.getAllAds(title));
         return ResponseEntity.ok(ads);
     }
 
@@ -178,9 +174,8 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}") //DELETE http://localhost:8080/abs/{id}
-    public ResponseEntity<Void> deleteAds(Authentication authentication,
-                                          @PathVariable Integer id) {
-        adsService.deleteAds(id, authentication);
+    public ResponseEntity<Void> deleteAds(@PathVariable Integer id) {
+        adsService.deleteAds(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -229,9 +224,8 @@ public class AdsController {
     )
     @PatchMapping("/{id}") //PATCH http://localhost:8080/abs/{id}
     public ResponseEntity<Ads> updateAds(@PathVariable int id,
-                                         @RequestBody CreateAds createAds,
-                                         Authentication authentication) {
-        return ResponseEntity.ok(adsService.updateAds(createAds, id, authentication));
+                                         @RequestBody CreateAds createAds) {
+        return ResponseEntity.ok(adsService.updateAds(createAds, id));
     }
 
     /**
@@ -262,7 +256,8 @@ public class AdsController {
     )
     @GetMapping("/me") //GET http://localhost:8080/abs/me
     public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe(Authentication authentication) {
-        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe(authentication));
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>();
+        ads.setResults((List<Ads>) adsService.getAdsMe(authentication));
         return ResponseEntity.ok(ads);
     }
 
@@ -312,6 +307,7 @@ public class AdsController {
     //PATCH http://localhost:8080/abs/{id}/image
     public ResponseEntity<String> updateImage(@PathVariable int id,
                                               @RequestPart MultipartFile image) {
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok(adsService.updateImage(id, image));
     }
 }
