@@ -30,6 +30,7 @@ public interface AdsMapper {
 
     void createAdsDtoToAdsEntity(CreateAds createAdsDTO, @MappingTarget AdsEntity adsEntity);
 
+
     Collection<Ads> adsEntityToCollectionDto(Collection<AdsEntity> adsCollection);
 
     AdsEntity toEntity(CreateAds createAdsDto);
