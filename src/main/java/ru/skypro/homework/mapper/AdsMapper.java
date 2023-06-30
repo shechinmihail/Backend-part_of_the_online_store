@@ -11,12 +11,13 @@ import ru.skypro.homework.dto.FullAds;
 import ru.skypro.homework.entity.AdsEntity;
 
 import java.util.Collection;
+
 @Component
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AdsMapper {
 
-    @Mapping(target = "author", source = "author.id")
-    @Mapping(target = "pk", source = "id")
+    @Mapping(source = "id", target = "pk")
+    @Mapping(source = "author.id", target = "author")
     @Mapping(target = "image", expression = "java(imageMapper(adsEntity))")
     Ads toAdsDto(AdsEntity adsEntity);
 
@@ -35,7 +36,7 @@ public interface AdsMapper {
 
     AdsEntity toEntity(CreateAds createAdsDto);
 
-    default String imageMapper(AdsEntity adsEntity){
+    default String imageMapper(AdsEntity adsEntity) {
         return "/ads/" + adsEntity.getId() + "/image";
     }
 }

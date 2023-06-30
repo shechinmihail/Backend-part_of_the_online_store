@@ -8,9 +8,12 @@ import ru.skypro.homework.dto.ResponseWrapperComment;
 
 public interface CommentService {
     ResponseWrapperComment getComments(Integer adsId);
+
     Comment addComment(Integer adsId, CreateComment createComment, Authentication authentication);
 
     void deleteComment(Integer adsId, Integer commentId);
+
+    void deleteAllByAdsId(Integer adsId);
 
     Comment updateComment(Integer adsId, Integer commentId, Comment comment);
 }

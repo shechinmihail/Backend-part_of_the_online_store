@@ -87,7 +87,7 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет добавить комментарий к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adsId          идентификатор объявления, не может быть null
      * @param createComment  создание текста комментария
      * @param authentication авторизованный пользователь
      * @return возвращает добавленный комментарий
@@ -120,12 +120,22 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
+     * Позволяет удалить все комментарий объявления
+     *
+     * @param adsId идентификатор объявления, не может быть null
+     */
+    @Override
+    public void deleteAllByAdsId(Integer adsId) {
+        commentRepository.deleteAllByAdsId(adsId);
+    }
+
+    /**
      * Позволяет изменить комментарий
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getByIdAndAdsId(Integer, Integer)}
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param commentId      идентификатор комментария, не может быть null
-     * @param comment        измененный комментарий
+     * @param commentId идентификатор комментария, не может быть null
+     * @param comment   измененный комментарий
      * @return возвращает измененный комментарий
      */
     @Override

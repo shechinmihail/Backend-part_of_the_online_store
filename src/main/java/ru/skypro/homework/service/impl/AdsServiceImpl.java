@@ -24,6 +24,8 @@ import ru.skypro.homework.service.UserService;
 import java.io.IOException;
 import java.util.Collection;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 /**
  * Сервис AdsServiceImpl
  * Сервис для добавления, удаления, редактирования и поиска объявлений в базе данных
@@ -55,7 +57,7 @@ public class AdsServiceImpl implements AdsService {
     private final UserService userService;
     private final ImageService imageService;
     private final CommentService commentService;
-    private final MyUserDetails myUserDetails;
+    private final MyUserDetails myUserDetails; // string security положит сюда авторизированного пользователя
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -88,11 +90,13 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Collection<Ads> getAllAds(String title) {
         logger.info("Вызван метод получения всех объявлений");
-        if (title == null) {
-
-            return adsMapper.adsEntityToCollectionDto(adsRepository.findAll());
+        Collection<AdsEntity> adsEntities;
+        if (!isEmpty(title)) {
+            adsEntities = adsRepository.findByTitleLikeIgnoreCase(title);
+        } else {
+            adsEntities = adsRepository.findAll();
         }
-        return adsMapper.adsEntityToCollectionDto(adsRepository.findByTitleLikeIgnoreCase(title));
+        return adsMapper.adsEntityToCollectionDto(adsEntities);
     }
 
     /**
@@ -123,6 +127,7 @@ public class AdsServiceImpl implements AdsService {
 
         adsEntity.setImageEntity(adImage);
         adsRepository.save(adsEntity);
+        logger.info("Сохранено новое объявление");
 
         return adsMapper.toAdsDto(adsEntity);
     }
@@ -136,25 +141,28 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAds getAds(Integer adsId) {
         logger.info("Вызван метод получения объявления по идентификатору (id)");
-        return adsMapper.toFullAdsDto(adsRepository.findById(adsId).orElseThrow());
+        return adsMapper.toFullAdsDto(adsRepository.findById(adsId).orElseThrow()); // TODO сделать свое исключение
     }
 
     /**
      * Удаление объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId          идентификатор объявления, не может быть null
+     * @param adsId идентификатор объявления, не может быть null
      */
     @Override
     public void deleteAds(Integer adsId) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
+        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(); // TODO сделать свое исключение
+        commentService.deleteAllByAdsId(adsId);
         adsRepository.deleteById(adsId);
+        imageService.deleteImage(adsEntity.getImageEntity().getId());
     }
 
     /**
      * Обновление объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId          идентификатор объявления, не может быть null
-     * @param createAds      данные объявления
+     * @param adsId     идентификатор объявления, не может быть null
+     * @param createAds данные объявления
      * @return возвращает обновленное объявление по идентификатору (id)
      */
     @Override
@@ -193,8 +201,8 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Обновление картинки объявления
      *
-     * @param adsId          идентификатор объявления, не может быть null
-     * @param image          картинка объявления
+     * @param adsId идентификатор объявления, не может быть null
+     * @param image картинка объявления
      * @return объявление с новой картинкой
      */
     @Override
@@ -217,6 +225,18 @@ public class AdsServiceImpl implements AdsService {
         AdsEntity ad = adsRepository.findById(adsId).get();
         ad.setImageEntity(adImage);
         adsRepository.save(ad);
-        return adsMapper.toAdsDto(ad).getImage(); //TODO нужно в маппере сделать создание ссылки изображения
+        return adsMapper.toAdsDto(ad).getImage();
+    }
+
+    /**
+     * Получение картинки объявления
+     *
+     * @param adsId идентификатор объявления, не может быть null
+     * @return картинку объявления
+     */
+    @Override
+    public byte[] getAdsImage(Integer adsId) {
+        logger.info("Вызван метод получения картинки объявления по идентификатору (id)");
+        return imageService.getImage(adsRepository.findById(adsId).orElseThrow().getImageEntity().getId()); // TODO сделать свое исключение
     }
 }
