@@ -34,13 +34,15 @@ public class MyUserDetailsService implements UserDetailsService {
      * Конструктор - создание нового объекта
      *
      * @param userRepository
+     * @param userMapper
      * @param myUserDetails
      * @see UserRepository (UserRepository)
      * @see UserMapper (UserMapper)
      * @see MyUserDetails (MyUserDetails)
      */
-    public MyUserDetailsService(UserRepository userRepository, MyUserDetails myUserDetails) {
+    public MyUserDetailsService(UserRepository userRepository, UserMapper userMapper, MyUserDetails myUserDetails) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
         this.myUserDetails = myUserDetails;
     }
 

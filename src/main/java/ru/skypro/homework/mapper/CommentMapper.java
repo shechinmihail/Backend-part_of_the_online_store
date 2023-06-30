@@ -38,4 +38,9 @@ public interface CommentMapper {
         }
         return localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
+
+    default String image(CommentEntity commentEntity) {
+        int id = commentEntity.getAuthor().getId().intValue();
+        return "/users/" + id + "/image";
+    }
 }

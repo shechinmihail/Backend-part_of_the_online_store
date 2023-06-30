@@ -105,7 +105,6 @@ public class CommentController {
      *
      * @param commentId      идентификатор комментария, не может быть null
      * @param comment        обновленный комментарий
-     * @param authentication авторизованный пользователь
      * @return обновленный комментарий
      */
     @Operation(
@@ -138,9 +137,8 @@ public class CommentController {
     )
     @PatchMapping("{adId}/comments/{commentId}")
     public ResponseEntity<Comment> updateComment(@PathVariable int adsId, @PathVariable int commentId,
-                                                 @RequestBody Comment comment,
-                                                 Authentication authentication) {
-        return ResponseEntity.ok(commentService.updateComment(adsId, commentId, comment, authentication));
+                                                 @RequestBody Comment comment) {
+        return ResponseEntity.ok(commentService.updateComment(adsId, commentId, comment));
     }
 
     /**
@@ -148,7 +146,6 @@ public class CommentController {
      *
      * @param commentId      идентификатор комментария, не может быть null
      * @param adsId          идентификатор объявления, не может быть null
-     * @param authentication авторизованный пользователь
      */
     @Operation(
             summary = "Удалить комментарий",
@@ -179,8 +176,8 @@ public class CommentController {
             }
     )
     @DeleteMapping("{adId}/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable int adsId, @PathVariable int commentId, Authentication authentication) {
-        commentService.deleteComment(adsId, commentId, authentication);
+    public ResponseEntity<?> deleteComment(@PathVariable int adsId, @PathVariable int commentId) {
+        commentService.deleteComment(adsId, commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

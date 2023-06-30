@@ -4,19 +4,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
-import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.AdsMapper;
-import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.security.MyUserDetails;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
@@ -28,6 +29,7 @@ import java.util.Collection;
  * Сервис для добавления, удаления, редактирования и поиска объявлений в базе данных
  */
 @Service
+@Transactional
 public class AdsServiceImpl implements AdsService {
 
     private static final Logger logger = LoggerFactory.getLogger(Ads.class);
@@ -52,7 +54,8 @@ public class AdsServiceImpl implements AdsService {
      */
     private final UserService userService;
     private final ImageService imageService;
-
+    private final CommentService commentService;
+    private final MyUserDetails myUserDetails;
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -61,16 +64,20 @@ public class AdsServiceImpl implements AdsService {
      * @param adsMapper
      * @param userRepository репозиторий пользователя
      * @param userService    сервис пользователя
-     * @param userMapper
      * @param imageService
+     * @param commentService
+     * @param myUserDetails
      * @see AdsRepository(AdsRepository)
      */
-    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService, UserMapper userMapper, ImageService imageService) {
+    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService,
+                          ImageService imageService, CommentService commentService, MyUserDetails myUserDetails) {
         this.adsRepository = adsRepository;
         this.adsMapper = adsMapper;
         this.userRepository = userRepository;
         this.userService = userService;
         this.imageService = imageService;
+        this.commentService = commentService;
+        this.myUserDetails = myUserDetails;
     }
 
     /**
@@ -101,7 +108,6 @@ public class AdsServiceImpl implements AdsService {
         if (createAds.getPrice() < 0) {
             throw new IllegalArgumentException("Цена должна быть больше 0!");
         }
-
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);

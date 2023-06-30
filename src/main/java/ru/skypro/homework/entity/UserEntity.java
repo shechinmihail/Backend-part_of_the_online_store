@@ -12,9 +12,9 @@ import static javax.persistence.GenerationType.IDENTITY;
  */
 @Entity
 @Data
-@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "users")
 public class UserEntity {
 
     /**

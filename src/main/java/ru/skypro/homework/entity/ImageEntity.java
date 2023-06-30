@@ -3,6 +3,7 @@ package ru.skypro.homework.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -33,5 +34,7 @@ public class ImageEntity {
     /**
      * Данные изображения
      */
+    @Lob
+    @Type(type = "org.hibernate.type.BinaryType")
     private byte[] data;
 }
