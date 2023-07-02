@@ -1,19 +1,20 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
-import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.AdsMapper;
-import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
@@ -27,7 +28,10 @@ import java.util.Collection;
  * Сервис AdsServiceImpl
  * Сервис для добавления, удаления, редактирования и поиска объявлений в базе данных
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class AdsServiceImpl implements AdsService {
 
     private static final Logger logger = LoggerFactory.getLogger(Ads.class);
@@ -65,13 +69,13 @@ public class AdsServiceImpl implements AdsService {
      * @param imageService
      * @see AdsRepository(AdsRepository)
      */
-    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService, UserMapper userMapper, ImageService imageService) {
-        this.adsRepository = adsRepository;
-        this.adsMapper = adsMapper;
-        this.userRepository = userRepository;
-        this.userService = userService;
-        this.imageService = imageService;
-    }
+//    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService, UserMapper userMapper, ImageService imageService) {
+//        this.adsRepository = adsRepository;
+//        this.adsMapper = adsMapper;
+//        this.userRepository = userRepository;
+//        this.userService = userService;
+//        this.imageService = imageService;
+//    }
 
     /**
      * Получение списка всех объявлений из базы данных

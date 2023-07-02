@@ -1,10 +1,12 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.dto.ResponseWrapperComment;
@@ -27,6 +29,8 @@ import java.util.Collection;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class CommentServiceImpl implements CommentService {
 
     private static final Logger logger = LoggerFactory.getLogger(Comment.class);
@@ -60,12 +64,12 @@ public class CommentServiceImpl implements CommentService {
      * @param commentMapper
      * @see CommentRepository (CommentRepository)
      */
-    public CommentServiceImpl(CommentRepository commentRepository, AdsRepository adsRepository, UserRepository userRepository, CommentMapper commentMapper) {
-        this.commentRepository = commentRepository;
-        this.adsRepository = adsRepository;
-        this.userRepository = userRepository;
-        this.commentMapper = commentMapper;
-    }
+//    public CommentServiceImpl(CommentRepository commentRepository, AdsRepository adsRepository, UserRepository userRepository, CommentMapper commentMapper) {
+//        this.commentRepository = commentRepository;
+//        this.adsRepository = adsRepository;
+//        this.userRepository = userRepository;
+//        this.commentMapper = commentMapper;
+//    }
 
     /**
      * Позволяет получить все комментарии к определенному объявлению
@@ -77,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseWrapperComment getComments(Integer adsId) {
         logger.info("Вызван метод получения всех комментариев к определенному объявлению");
-        Collection<CommentEntity> comments = commentRepository.getByAdsId(adsId);
+        Collection<CommentEntity> comments = commentRepository.getCommentEntitiesByAd_Id(adsId);
         ResponseWrapperComment responseWrapperComment = new ResponseWrapperComment();
         responseWrapperComment.setResults(commentMapper.commentsEntityToCommentsDtoCollection(comments));
         return responseWrapperComment;
@@ -116,7 +120,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Integer adsId, Integer commentId) {
         logger.info("Вызван метод удаления комментария по идентификатору (id)");
-        commentRepository.deleteByIdAndAdsId(adsId, commentId);
+        commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
     }
 
     /**
@@ -131,7 +135,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Comment updateComment(Integer adsId, @NotNull Integer commentId, Comment comment) {
         logger.info("Вызван метод обновления комментария по идентификатору (id)");
-        CommentEntity updateCommentEntity = commentRepository.getByIdAndAdsId(adsId, commentId);
+        CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId);
         updateCommentEntity.setText(comment.getText());
         commentRepository.save(updateCommentEntity);
         return commentMapper.toDto(updateCommentEntity);
