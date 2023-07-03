@@ -61,8 +61,7 @@ public class AdsController {
     )
     @GetMapping(path = "/all")  //GET http://localhost:8080/abs/all
     public ResponseEntity<ResponseWrapperAds<Ads>> getAllAds(@RequestParam(required = false) String title) {
-        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>();
-        ads.setResults((List<Ads>) adsService.getAllAds(title));
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAllAds(title));
         return ResponseEntity.ok(ads);
     }
 
@@ -256,8 +255,7 @@ public class AdsController {
     )
     @GetMapping("/me") //GET http://localhost:8080/abs/me
     public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe(Authentication authentication) {
-        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>();
-        ads.setResults((List<Ads>) adsService.getAdsMe(authentication));
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe(authentication));
         return ResponseEntity.ok(ads);
     }
 

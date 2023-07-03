@@ -100,8 +100,8 @@ public class CommentServiceImpl implements CommentService {
     public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
         CommentEntity commentEntity = commentMapper.toEntity(createComment);
-        AdsEntity adsEntity = adsRepository.findById(adsId).get();
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).get();
+        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        UserEntity author = userRepository.getUserEntitiesByEmail(authentication.getName());
         commentEntity.setAd(adsEntity);
         commentEntity.setAuthor(author);
         commentEntity.setCreatedAt(LocalDateTime.now());
