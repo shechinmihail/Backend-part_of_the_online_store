@@ -34,7 +34,7 @@ public class FullAds {
     private String email;
 
     /**
-     * Ссылка на изображение объявления
+     * Ссылка на картинку объявления
      */
     private String image;
 
@@ -44,7 +44,7 @@ public class FullAds {
     private String phone;
 
     /**
-     * Цена товара в объявлении
+     * Цена объявления
      */
     private int price;
 
