@@ -94,10 +94,10 @@ public class CommentController {
             }
     )
     @PostMapping("{id}/comments")
-    public ResponseEntity<Comment> addComment(@PathVariable int adsId,
+    public ResponseEntity<Comment> addComment(@PathVariable int id,
                                               @RequestBody CreateComment createComment,
                                               @NonNull Authentication authentication) {
-        return ResponseEntity.ok(commentService.addComment(adsId, createComment, authentication));
+        return ResponseEntity.ok(commentService.addComment(id, createComment, authentication));
     }
 
     /**
@@ -136,9 +136,9 @@ public class CommentController {
             }
     )
     @PatchMapping("{adId}/comments/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable int adsId, @PathVariable int commentId,
+    public ResponseEntity<Comment> updateComment(@PathVariable int adId, @PathVariable int commentId,
                                                  @RequestBody Comment comment) {
-        return ResponseEntity.ok(commentService.updateComment(adsId, commentId, comment));
+        return ResponseEntity.ok(commentService.updateComment(adId, commentId, comment));
     }
 
     /**
@@ -176,8 +176,8 @@ public class CommentController {
             }
     )
     @DeleteMapping("{adId}/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable int adsId, @PathVariable int commentId) {
-        commentService.deleteComment(adsId, commentId);
+    public ResponseEntity<?> deleteComment(@PathVariable int adId, @PathVariable int commentId) {
+        commentService.deleteComment(adId, commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

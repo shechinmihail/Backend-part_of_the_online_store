@@ -1,5 +1,7 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -22,7 +24,9 @@ import java.nio.file.Files;
  * UserServiceImpl
  * Сервис для обновления пароля, информации, аватара и поиска авторизованного пользователя в базе данных
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
 
@@ -48,11 +52,11 @@ public class UserServiceImpl implements UserService {
      * @param imageService
      * @see UserRepository (UserRepository)
      */
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.imageService = imageService;
-    }
+//    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
+//        this.userRepository = userRepository;
+//        this.userMapper = userMapper;
+//        this.imageService = imageService;
+//    }
 
     /**
      * Обновление пароля пользователя

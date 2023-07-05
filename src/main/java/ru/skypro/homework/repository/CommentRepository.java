@@ -12,11 +12,16 @@ import java.util.Collection;
  */
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
-    Collection<CommentEntity> getByAdsId(Integer adsId);
+    // Collection<CommentEntity> getByAdsId(Integer adsId);
+    Collection<CommentEntity> getCommentEntitiesByAd_Id(Integer adsId);
 
-    CommentEntity getByIdAndAdsId(Integer adsId, Integer commentId);
+    // CommentEntity getByIdAndAdsId(Integer adsId, Integer commentId);
 
-    void deleteByIdAndAdsId(Integer adsId, Integer commentId);
+    CommentEntity getCommentEntityByAd_IdAndId(Integer adsId, Integer commentId);
+
+    //void deleteByIdAndAdsId(Integer adsId, Integer commentId);
+
+    void deleteCommentEntitiesByAd_IdAndId(Integer adsId, Integer commentId);
 
     void deleteAllByAdsId(Integer adsId);
 }

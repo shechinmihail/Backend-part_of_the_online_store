@@ -1,5 +1,7 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -30,7 +33,9 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * Сервис AdsServiceImpl
  * Сервис для добавления, удаления, редактирования и поиска объявлений в базе данных
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class AdsServiceImpl implements AdsService {
 
@@ -66,21 +71,23 @@ public class AdsServiceImpl implements AdsService {
      * @param adsMapper
      * @param userRepository репозиторий пользователя
      * @param userService    сервис пользователя
+     * @param userMapper
      * @param imageService
      * @param commentService
      * @param myUserDetails
      * @see AdsRepository(AdsRepository)
      */
-    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService,
-                          ImageService imageService, CommentService commentService, MyUserDetails myUserDetails) {
-        this.adsRepository = adsRepository;
-        this.adsMapper = adsMapper;
-        this.userRepository = userRepository;
-        this.userService = userService;
-        this.imageService = imageService;
-        this.commentService = commentService;
-        this.myUserDetails = myUserDetails;
-    }
+
+//    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService,
+//                          ImageService imageService, CommentService commentService, MyUserDetails myUserDetails) {
+//        this.adsRepository = adsRepository;
+//        this.adsMapper = adsMapper;
+//        this.userRepository = userRepository;
+//        this.userService = userService;
+//        this.imageService = imageService;
+//        this.commentService = commentService;
+//        this.myUserDetails = myUserDetails;
+//    }
 
     /**
      * Получение списка всех объявлений из базы данных
@@ -115,7 +122,7 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).get();
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new); //TODO сделать свое исключение
         adsEntity.setAuthor(author);
 
         ImageEntity adImage;
@@ -167,7 +174,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId) {
-        if (adsId == null || adsRepository.findById(adsId).isEmpty()) {
+        if (adsId == null) {
             throw new RuntimeException("Такого объявления не существует!");
         }
 
@@ -175,7 +182,7 @@ public class AdsServiceImpl implements AdsService {
             throw new RuntimeException("Цена должна быть больше 0!");
         }
 
-        AdsEntity updateAd = adsRepository.findById(adsId).get();
+        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
         updateAd.setTitle(createAds.getTitle());
         updateAd.setPrice(createAds.getPrice());
         updateAd.setDescription(createAds.getDescription());
@@ -208,7 +215,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public String updateImage(Integer adsId, MultipartFile image) {
         logger.info("Вызван метод обновления картинки объявления");
-        if (adsId == null || adsRepository.findById(adsId).isEmpty()) {
+        if (adsId == null) {
             throw new RuntimeException("Такого объявления не существует!");
         }
 
@@ -222,7 +229,7 @@ public class AdsServiceImpl implements AdsService {
         int imageId = adImage.getId();
         imageService.deleteImage(imageId);
 
-        AdsEntity ad = adsRepository.findById(adsId).get();
+        AdsEntity ad = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
         ad.setImageEntity(adImage);
         adsRepository.save(ad);
         return adsMapper.toAdsDto(ad).getImage();
