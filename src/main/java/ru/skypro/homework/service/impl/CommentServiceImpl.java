@@ -53,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
     /**
      * Поле маппинга комментариев
      */
-    private final CommentMapper commentMapper;
+    private CommentMapper commentMapper;
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -73,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Позволяет получить все комментарии к определенному объявлению
-     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getByAdsId(Integer)}
+     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getCommentEntitiesByAd_Id(Integer)}
      *
      * @param adsId идентификатор объявления, не может быть null
      * @return возвращает все комментарии к определенному объявлению
@@ -112,7 +112,7 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Позволяет удалить комментарий
-     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#deleteByIdAndAdsId(Integer, Integer)}
+     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#deleteCommentEntitiesByAd_IdAndId(Integer, Integer)}
      *
      * @param commentId идентификатор комментария, не может быть null
      * @param adsId     идентификатор объявления, не может быть null
@@ -135,7 +135,7 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Позволяет изменить комментарий
-     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getByIdAndAdsId(Integer, Integer)}
+     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getCommentEntityByAd_IdAndId(Integer, Integer)}
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
      * @param commentId идентификатор комментария, не может быть null

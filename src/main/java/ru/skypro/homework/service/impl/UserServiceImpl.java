@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     /**
      * Поле маппинга пользователя
      */
-    private final UserMapper userMapper;
+    private UserMapper userMapper;
 
     private final ImageServiceImpl imageService;
 

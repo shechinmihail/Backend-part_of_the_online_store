@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.List;
+
 
 /**
  * Контроллер AdsController

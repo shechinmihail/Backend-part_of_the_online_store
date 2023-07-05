@@ -49,7 +49,7 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Поле маппинга объявлении
      */
-    private final AdsMapper adsMapper;
+    private AdsMapper adsMapper;
 
     /**
      * Поле репозитория пользователя
