@@ -53,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
     /**
      * Поле маппинга комментариев
      */
-    private CommentMapper commentMapper;
+    private final CommentMapper commentMapper;
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -75,13 +75,13 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет получить все комментарии к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getCommentEntitiesByAd_Id(Integer)}
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adId идентификатор объявления, не может быть null
      * @return возвращает все комментарии к определенному объявлению
      */
     @Override
-    public ResponseWrapperComment getComments(Integer adsId) {
+    public ResponseWrapperComment getComments(Integer adId) {
         logger.info("Вызван метод получения всех комментариев к определенному объявлению");
-        Collection<CommentEntity> comments = commentRepository.getCommentEntitiesByAd_Id(adsId);
+        Collection<CommentEntity> comments = commentRepository.getCommentEntitiesByAd_Id(adId);
         ResponseWrapperComment responseWrapperComment = new ResponseWrapperComment();
         responseWrapperComment.setResults(commentMapper.commentsEntityToCommentsDtoCollection(comments));
         return responseWrapperComment;
@@ -91,16 +91,16 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет добавить комментарий к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param adsId          идентификатор объявления, не может быть null
+     * @param adId          идентификатор объявления, не может быть null
      * @param createComment  создание текста комментария
      * @param authentication авторизованный пользователь
      * @return возвращает добавленный комментарий
      */
     @Override
-    public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
+    public Comment addComment(@NotNull Integer adId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
         CommentEntity commentEntity = commentMapper.toEntity(createComment);
-        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity adsEntity = adsRepository.findById(adId).orElseThrow(RuntimeException::new);
         UserEntity author = userRepository.getUserEntitiesByEmail(authentication.getName());
         commentEntity.setAd(adsEntity);
         commentEntity.setAuthor(author);
@@ -115,22 +115,22 @@ public class CommentServiceImpl implements CommentService {
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#deleteCommentEntitiesByAd_IdAndId(Integer, Integer)}
      *
      * @param commentId идентификатор комментария, не может быть null
-     * @param adsId     идентификатор объявления, не может быть null
+     * @param adId     идентификатор объявления, не может быть null
      */
     @Override
-    public void deleteComment(Integer adsId, Integer commentId) {
+    public void deleteComment(Integer adId, Integer commentId) {
         logger.info("Вызван метод удаления комментария по идентификатору (id)");
-        commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
+        commentRepository.deleteCommentEntitiesByAd_IdAndId(adId, commentId);
     }
 
     /**
      * Позволяет удалить все комментарий объявления
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adId идентификатор объявления, не может быть null
      */
     @Override
-    public void deleteAllByAdsId(Integer adsId) {
-        commentRepository.deleteAllByAdsId(adsId);
+    public void deleteAllByAdsId(Integer adId) {
+        commentRepository.deleteAllByAdId(adId);
     }
 
     /**
@@ -143,9 +143,9 @@ public class CommentServiceImpl implements CommentService {
      * @return возвращает измененный комментарий
      */
     @Override
-    public Comment updateComment(Integer adsId, @NotNull Integer commentId, Comment comment) {
+    public Comment updateComment(Integer adId, @NotNull Integer commentId, Comment comment) {
         logger.info("Вызван метод обновления комментария по идентификатору (id)");
-        CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId);
+        CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adId, commentId);
         updateCommentEntity.setText(comment.getText());
         commentRepository.save(updateCommentEntity);
         return commentMapper.toDto(updateCommentEntity);

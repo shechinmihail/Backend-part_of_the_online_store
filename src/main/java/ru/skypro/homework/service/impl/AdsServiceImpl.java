@@ -25,7 +25,6 @@ import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Optional;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -49,7 +48,7 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Поле маппинга объявлении
      */
-    private AdsMapper adsMapper;
+    private final AdsMapper adsMapper;
 
     /**
      * Поле репозитория пользователя
@@ -71,7 +70,6 @@ public class AdsServiceImpl implements AdsService {
      * @param adsMapper
      * @param userRepository репозиторий пользователя
      * @param userService    сервис пользователя
-     * @param userMapper
      * @param imageService
      * @param commentService
      * @param myUserDetails
@@ -122,7 +120,7 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new); //TODO сделать свое исключение
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new); // TODO сделать свое исключение
         adsEntity.setAuthor(author);
 
         ImageEntity adImage;
