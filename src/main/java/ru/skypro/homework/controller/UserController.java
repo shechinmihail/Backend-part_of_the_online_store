@@ -72,7 +72,7 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
+    public ResponseEntity<NewPassword> setNewPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
         userService.setNewPassword(newPassword, authentication);
         return ResponseEntity.ok().build();
     }
@@ -105,7 +105,7 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<User> getUser(Authentication authentication) {
-        return ResponseEntity.ok(userService.getUser(authentication));
+        return ResponseEntity.ok(userService.getUserDTO(authentication));
     }
 
     /**
@@ -170,5 +170,36 @@ public class UserController {
     public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image, Authentication authentication) throws IOException {
         userService.updateUserImage(image, authentication);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Получить аватар авторизованного пользователя
+     *
+     * @param userId идентификатор авторизованного пользователя, не может быть null
+     * @return аватар авторизованного пользователя
+     */
+    @Operation(
+            summary = "Получить аватар авторизованного пользователя",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "ОК",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = MultipartFile.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = MultipartFile.class))
+                    )
+            }
+    )
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getUserImage(@PathVariable Integer userId) throws IOException {
+        return ResponseEntity.ok(userService.getUserImage(userId));
     }
 }

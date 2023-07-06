@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -30,6 +30,7 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ads")
+@Tag(name = "Ads")
 public class AdsController {
 
     /**
@@ -53,11 +54,19 @@ public class AdsController {
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ResponseWrapperAds.class)
                             )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Не удалось получить список объявлении",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ResponseWrapperAds.class)
+                            )
                     )
             }
 
     )
-    @GetMapping(path = "/all")  //GET http://localhost:8080/abs/all
+    @GetMapping(path = "/all")  //GET http://localhost:8080/ads/all
     public ResponseEntity<ResponseWrapperAds<Ads>> getAllAds(@RequestParam(required = false) String title) {
         ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAllAds(title));
         return ResponseEntity.ok(ads);
@@ -91,8 +100,8 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //POST http://localhost:8080/abs
-    public ResponseEntity<Ads> createAds(@RequestPart("properties") @NotNull CreateAds createAds,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //POST http://localhost:8080/ads
+    public ResponseEntity<Ads> createAds(@RequestPart("properties") @NonNull CreateAds createAds,
                                          @RequestPart MultipartFile image,
                                          @NonNull Authentication authentication) {
         return ResponseEntity.ok(adsService.createAds(createAds, image, authentication));
@@ -132,8 +141,8 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping("/{id}") //GET http://localhost:8080/abs/{id}
-    public ResponseEntity<FullAds> getAds(@PathVariable Integer id) {
+    @GetMapping("/{id}") //GET http://localhost:8080/ads/{id}
+    public ResponseEntity<FullAds> getAds(@PathVariable int id) {
         return ResponseEntity.ok(adsService.getAds(id));
     }
 
@@ -170,10 +179,10 @@ public class AdsController {
                     )
             }
     )
-    @DeleteMapping("/{id}") //DELETE http://localhost:8080/abs/{id}
-    public ResponseEntity<Void> deleteAds(@PathVariable Integer id) {
+    @DeleteMapping("/{id}") //DELETE http://localhost:8080/ads/{id}
+    public ResponseEntity<?> deleteAds(@PathVariable int id) {
         adsService.deleteAds(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -219,7 +228,7 @@ public class AdsController {
                     )
             }
     )
-    @PatchMapping("/{id}") //PATCH http://localhost:8080/abs/{id}
+    @PatchMapping("/{id}") //PATCH http://localhost:8080/ads/{id}
     public ResponseEntity<Ads> updateAds(@PathVariable int id,
                                          @RequestBody CreateAds createAds) {
         return ResponseEntity.ok(adsService.updateAds(createAds, id));
@@ -228,7 +237,6 @@ public class AdsController {
     /**
      * Функция получения объявления авторизованного пользователя, хранящихся в базе данных
      *
-     * @param authentication авторизованный пользователь
      * @return возвращает объявление авторизованного пользователя
      */
     @Operation(
@@ -239,7 +247,7 @@ public class AdsController {
                             description = "ОК",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Ads.class)
+                                    schema = @Schema(implementation = ResponseWrapperAds.class)
                             )
                     ),
                     @ApiResponse(
@@ -247,13 +255,13 @@ public class AdsController {
                             description = "Неавторизованный пользователь",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Ads.class))
+                                    schema = @Schema(implementation = ResponseWrapperAds.class))
                     )
             }
     )
-    @GetMapping("/me") //GET http://localhost:8080/abs/me
-    public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe(Authentication authentication) {
-        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe(authentication));
+    @GetMapping("/me") //GET http://localhost:8080/ads/me
+    public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe() {
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe());
         return ResponseEntity.ok(ads);
     }
 
@@ -300,10 +308,15 @@ public class AdsController {
             }
     )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    //PATCH http://localhost:8080/abs/{id}/image
+    //PATCH http://localhost:8080/ads/{id}/image
     public ResponseEntity<String> updateImage(@PathVariable int id,
                                               @RequestPart MultipartFile image) {
 
         return ResponseEntity.ok(adsService.updateImage(id, image));
+    }
+
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getAdsImage(@PathVariable Integer id) {
+        return ResponseEntity.ok(adsService.getAdsImage(id));
     }
 }

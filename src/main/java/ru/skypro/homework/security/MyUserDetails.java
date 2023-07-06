@@ -22,6 +22,10 @@ public class MyUserDetails implements UserDetails {
         this.userSecurity = userSecurity;
     }
 
+    public Integer getUserId() {
+        return Optional.ofNullable(userSecurity).map(UserSecurity::getId).orElse(null);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Optional.ofNullable(userSecurity)

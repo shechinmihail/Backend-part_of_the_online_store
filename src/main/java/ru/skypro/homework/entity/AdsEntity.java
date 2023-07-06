@@ -48,4 +48,15 @@ public class AdsEntity {
     @JoinColumn(name = "image_id")
     private ImageEntity imageEntity;
 
+    @Override
+    public String toString() {
+        return "AdsEntity{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", title='" + title + '\'' +
+                ", author=" + author +
+                ", imageEntity=" + imageEntity +
+                '}';
+    }
 }

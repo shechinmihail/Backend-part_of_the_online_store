@@ -193,14 +193,15 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Получение объявлений авторизованного пользователя, хранящихся в базе данных
      *
-     * @param authentication авторизованный пользователь
      * @return возвращает все объявления авторизованного пользователя
      */
     @Override
-    public Collection<Ads> getAdsMe(Authentication authentication) {
+    public Collection<Ads> getAdsMe() {
         logger.info("Вызван метод получения объявлений авторизованного пользователя");
-        Collection<AdsEntity> AdsEntity = adsRepository.findByAuthorId(userService.getUser(authentication).getId());
-        return adsMapper.adsEntityToCollectionDto(AdsEntity);
+        Collection<AdsEntity> adsEntity;
+        logger.info(myUserDetails.getUserId() + " " + myUserDetails.getAuthorities() + " " + myUserDetails.getUsername());
+        adsEntity = adsRepository.findAllAdsByAuthorId(myUserDetails.getUserId());
+        return adsMapper.adsEntityToCollectionDto(adsEntity);
     }
 
     /**

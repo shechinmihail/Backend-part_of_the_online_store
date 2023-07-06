@@ -12,10 +12,10 @@ import java.util.Collection;
 public interface AdsService {
     Collection<Ads> getAllAds(String title);
     Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication);
-    FullAds getAds(Integer adsId);
-    void deleteAds(Integer adsId);
-    Ads updateAds(CreateAds createAds, Integer adsId);
-    Collection<Ads> getAdsMe(Authentication authentication);
-    String updateImage(Integer adsId, MultipartFile image);
-    byte[] getAdsImage(Integer adsId);
+    FullAds getAds(Integer adId);
+    void deleteAds(Integer adId);
+    Ads updateAds(CreateAds createAds, Integer adId);
+    Collection<Ads> getAdsMe();
+    String updateImage(Integer adId, MultipartFile image);
+    byte[] getAdsImage(Integer adId);
 }

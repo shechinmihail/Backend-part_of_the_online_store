@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +14,7 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.ObjectAbsenceException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
@@ -44,6 +47,8 @@ public class UserServiceImpl implements UserService {
 
     private final ImageServiceImpl imageService;
 
+    private final PasswordEncoder passwordEncoder;
+
     /**
      * Конструктор - создание нового объекта репозитория
      *
@@ -68,8 +73,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
-        userEntity.setPassword(newPassword.getNewPassword());
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO надо сделать исключение
+        userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
         userRepository.save(userEntity);
         userMapper.toDto(userEntity);
     }
@@ -81,9 +86,21 @@ public class UserServiceImpl implements UserService {
      * @return информацию об авторизованном пользователе
      */
     @Override
-    public User getUser(Authentication authentication) {
+    public User getUserDTO(Authentication authentication) {
         logger.info("Вызван метод получения информации об авторизованном пользователе");
         return userMapper.toDto(userRepository.getUserEntitiesByEmail(authentication.getName()));
+    }
+
+    /**
+     * Получение информации об авторизованном пользователе
+     *
+     * @param authentication авторизованный пользователь
+     * @return информацию об авторизованном пользователе
+     */
+    @Override
+    public UserEntity getUser(Authentication authentication) {
+        logger.info("Вызван метод получения информации об авторизованном пользователе");
+        return userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO надо сделать исключение
     }
 
     /**
@@ -120,13 +137,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public byte[] getUserImage(Integer userId) throws IOException {
+    public byte[] getUserImage(Integer authorId) throws IOException {
         logger.info("Вызван метод получения аватара пользователя");
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(); // TODO надо сделать исключение
+        UserEntity userEntity = userRepository.findById(authorId).orElseThrow(); // TODO надо сделать исключение
         if (userEntity.getImageEntity() != null){
             return userEntity.getImageEntity().getData();
         } else {
-            File avatar = new File("src/main/resources/imageAvatar/*");
+            File avatar = new File("src/main/resources/imageAvatar/avatar.png");
             return Files.readAllBytes(avatar.toPath());
         }
     }

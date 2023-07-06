@@ -24,7 +24,8 @@ public class WebSecurityConfig {
             "/v3/api-docs",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/ads", "/user/avatar/**"
     };
 
 //  @Bean
@@ -48,7 +49,7 @@ public class WebSecurityConfig {
                                 authorization
                                         .mvcMatchers(AUTH_WHITELIST)
                                         .permitAll()
-                                        .mvcMatchers(HttpMethod.GET, "/ads/", "/ads/image/*", "/users/avatar/**")
+                                        .mvcMatchers(HttpMethod.GET, "/ads", "/ads/image/**", "/users/avatar/**")
                                         .permitAll()
                                         .mvcMatchers("/ads/**", "/users/**")
                                         .authenticated())

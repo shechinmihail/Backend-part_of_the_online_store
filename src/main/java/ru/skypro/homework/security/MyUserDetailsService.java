@@ -1,5 +1,6 @@
 package ru.skypro.homework.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,7 @@ import ru.skypro.homework.repository.UserRepository;
  * Сервис для данных пользователя
  */
 @Service
+@RequiredArgsConstructor
 public class MyUserDetailsService implements UserDetailsService {
 
     /**
@@ -23,36 +25,19 @@ public class MyUserDetailsService implements UserDetailsService {
     /**
      * Поле маппинга пользователя
      */
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
     /**
      * Поле данных пользователя
      */
     private final MyUserDetails myUserDetails;
 
-    /**
-     * Конструктор - создание нового объекта
-     *
-     * @param userRepository
-     * @param userMapper
-     * @param myUserDetails
-     * @see UserRepository (UserRepository)
-     * @see UserMapper (UserMapper)
-     * @see MyUserDetails (MyUserDetails)
-     */
-    public MyUserDetailsService(UserRepository userRepository, UserMapper userMapper, MyUserDetails myUserDetails) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.myUserDetails = myUserDetails;
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserSecurity userSecurity = userRepository.findByEmailIgnoreCase(username)
                 .map(userMapper::toSecurityDTO)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-        MyUserDetails userDetails = new MyUserDetails();
-        userDetails.setUserSecurity(userSecurity);
-        return userDetails;
+        myUserDetails.setUserSecurity(userSecurity);
+        return myUserDetails;
     }
 }
