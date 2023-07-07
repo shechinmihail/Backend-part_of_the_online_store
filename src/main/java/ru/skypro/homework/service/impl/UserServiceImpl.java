@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +13,6 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.exception.ObjectAbsenceException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
@@ -48,20 +46,6 @@ public class UserServiceImpl implements UserService {
     private final ImageServiceImpl imageService;
 
     private final PasswordEncoder passwordEncoder;
-
-    /**
-     * Конструктор - создание нового объекта репозитория
-     *
-     * @param userRepository
-     * @param userMapper
-     * @param imageService
-     * @see UserRepository (UserRepository)
-     */
-//    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
-//        this.userRepository = userRepository;
-//        this.userMapper = userMapper;
-//        this.imageService = imageService;
-//    }
 
     /**
      * Обновление пароля пользователя
@@ -147,4 +131,11 @@ public class UserServiceImpl implements UserService {
             return Files.readAllBytes(avatar.toPath());
         }
     }
+
+    @Override
+    public UserEntity getNameUser(String email) {
+        return userRepository.findByEmailIgnoreCase(email).orElseThrow(); // TODO надо сделать исключение
+    }
+
+
 }

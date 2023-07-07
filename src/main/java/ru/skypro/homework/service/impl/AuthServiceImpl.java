@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.findByEmailIgnoreCase(registerReq.getUsername()).isPresent()) { // если пользователь уже есть, то фолс
             return false;
         }
-        UserEntity userEntity = userMapper.toEntityFromReq(registerReq);
+        UserEntity userEntity = userMapper.toEntity(registerReq);
         userEntity.setRole(role);
         userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         userRepository.save(userEntity); // создается новый пользователь

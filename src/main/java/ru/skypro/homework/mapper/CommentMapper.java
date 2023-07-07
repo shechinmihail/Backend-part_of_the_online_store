@@ -37,7 +37,7 @@ public interface CommentMapper {
     }
 
     default String image(CommentEntity commentEntity) {
-        int id = commentEntity.getAuthor().getId();
+        int id = commentEntity.getAuthor().getId().intValue();
         return "/users/" + id + "/image";
     }
 

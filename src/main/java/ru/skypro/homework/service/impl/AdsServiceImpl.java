@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
@@ -120,8 +121,7 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new); // TODO сделать свое исключение
-        adsEntity.setAuthor(author);
+        adsEntity.setAuthor(userService.getUser(authentication));
 
         ImageEntity adImage;
         try {
@@ -140,39 +140,39 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Получение объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adId идентификатор объявления, не может быть null
      * @return возвращает объявление по идентификатору (id)
      */
     @Override
-    public FullAds getAds(Integer adsId) {
+    public FullAds getAds(Integer adId) {
         logger.info("Вызван метод получения объявления по идентификатору (id)");
-        return adsMapper.toFullAdsDto(adsRepository.findById(adsId).orElseThrow()); // TODO сделать свое исключение
+        return adsMapper.toFullAdsDto(adsRepository.findById(adId).orElseThrow()); // TODO сделать свое исключение
     }
 
     /**
      * Удаление объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adId идентификатор объявления, не может быть null
      */
     @Override
-    public void deleteAds(Integer adsId) {
+    public void deleteAds(Integer adId) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
-        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(); // TODO сделать свое исключение
-        commentService.deleteAllByAdsId(adsId);
-        adsRepository.deleteById(adsId);
+        AdsEntity adsEntity = adsRepository.findById(adId).orElseThrow(); // TODO сделать свое исключение
+        commentService.deleteAllByAdsId(adId);
+        adsRepository.deleteById(adId);
         imageService.deleteImage(adsEntity.getImageEntity().getId());
     }
 
     /**
      * Обновление объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId     идентификатор объявления, не может быть null
+     * @param adId     идентификатор объявления, не может быть null
      * @param createAds данные объявления
      * @return возвращает обновленное объявление по идентификатору (id)
      */
     @Override
-    public Ads updateAds(CreateAds createAds, Integer adsId) {
-        if (adsId == null) {
+    public Ads updateAds(CreateAds createAds, Integer adId) {
+        if (adId == null) {
             throw new RuntimeException("Такого объявления не существует!");
         }
 
@@ -180,7 +180,7 @@ public class AdsServiceImpl implements AdsService {
             throw new RuntimeException("Цена должна быть больше 0!");
         }
 
-        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity updateAd = adsRepository.findById(adId).orElseThrow(RuntimeException::new);
         updateAd.setTitle(createAds.getTitle());
         updateAd.setPrice(createAds.getPrice());
         updateAd.setDescription(createAds.getDescription());
@@ -198,23 +198,22 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Collection<Ads> getAdsMe() {
         logger.info("Вызван метод получения объявлений авторизованного пользователя");
-        Collection<AdsEntity> adsEntity;
-        logger.info(myUserDetails.getUserId() + " " + myUserDetails.getAuthorities() + " " + myUserDetails.getUsername());
-        adsEntity = adsRepository.findAllAdsByAuthorId(myUserDetails.getUserId());
+        UserEntity userEntity = userService.getNameUser(myUserDetails.getUsername());
+        Collection<AdsEntity> adsEntity = adsRepository.findAllAdsByAuthorId(userEntity.getId());
         return adsMapper.adsEntityToCollectionDto(adsEntity);
     }
 
     /**
      * Обновление картинки объявления
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adId  идентификатор объявления, не может быть null
      * @param image картинка объявления
      * @return объявление с новой картинкой
      */
     @Override
-    public String updateImage(Integer adsId, MultipartFile image) {
+    public String updateImage(Integer adId, MultipartFile image) {
         logger.info("Вызван метод обновления картинки объявления");
-        if (adsId == null) {
+        if (adId == null) {
             throw new RuntimeException("Такого объявления не существует!");
         }
 
@@ -228,7 +227,7 @@ public class AdsServiceImpl implements AdsService {
         int imageId = adImage.getId();
         imageService.deleteImage(imageId);
 
-        AdsEntity ad = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity ad = adsRepository.findById(adId).orElseThrow(RuntimeException::new);
         ad.setImageEntity(adImage);
         adsRepository.save(ad);
         return adsMapper.toAdsDto(ad).getImage();
@@ -237,12 +236,12 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Получение картинки объявления
      *
-     * @param adsId идентификатор объявления, не может быть null
+     * @param adId идентификатор объявления, не может быть null
      * @return картинку объявления
      */
     @Override
-    public byte[] getAdsImage(Integer adsId) {
+    public byte[] getAdsImage(Integer adId) {
         logger.info("Вызван метод получения картинки объявления по идентификатору (id)");
-        return imageService.getImage(adsRepository.findById(adsId).orElseThrow().getImageEntity().getId()); // TODO сделать свое исключение
+        return imageService.getImage(adsRepository.findById(adId).orElseThrow().getImageEntity().getId()); // TODO сделать свое исключение
     }
 }

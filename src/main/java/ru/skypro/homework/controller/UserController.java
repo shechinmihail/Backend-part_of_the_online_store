@@ -21,7 +21,7 @@ import java.io.IOException;
  * Контроллер UserController
  * Контроллер для обработки REST-запросов, добавление, удаление, редактирование и поиска пользователей
  *
- * @see
+ * @see UserService
  */
 
 @Slf4j
@@ -72,7 +72,7 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<NewPassword> setNewPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
+    public ResponseEntity<?> setNewPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
         userService.setNewPassword(newPassword, authentication);
         return ResponseEntity.ok().build();
     }
@@ -175,7 +175,7 @@ public class UserController {
     /**
      * Получить аватар авторизованного пользователя
      *
-     * @param userId идентификатор авторизованного пользователя, не может быть null
+     * @param id идентификатор авторизованного пользователя, не может быть null
      * @return аватар авторизованного пользователя
      */
     @Operation(
@@ -199,7 +199,7 @@ public class UserController {
             }
     )
     @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getUserImage(@PathVariable Integer userId) throws IOException {
-        return ResponseEntity.ok(userService.getUserImage(userId));
+    public ResponseEntity<byte[]> getUserImage(@PathVariable Integer id) throws IOException {
+        return ResponseEntity.ok(userService.getUserImage(id));
     }
 }
