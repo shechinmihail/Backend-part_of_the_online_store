@@ -59,7 +59,7 @@ public class AdsController {
             }
 
     )
-    @GetMapping(path = "/all")  //GET http://localhost:8080/abs/all
+    @GetMapping  //GET http://localhost:8080/ads
     public ResponseEntity<ResponseWrapperAds<Ads>> getAllAds(@RequestParam(required = false) String title) {
         ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAllAds(title));
         return ResponseEntity.ok(ads);

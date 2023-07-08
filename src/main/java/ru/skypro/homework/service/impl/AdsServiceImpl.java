@@ -11,12 +11,14 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.security.MyUserDetails;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
@@ -57,6 +59,8 @@ public class AdsServiceImpl implements AdsService {
      */
     private final UserService userService;
     private final ImageService imageService;
+
+    private final MyUserDetails userDetails;
 
 
     /**
@@ -146,7 +150,12 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public void deleteAds(Integer adsId) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
-        adsRepository.deleteById(adsId);
+        AdsEntity deleteAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        if (deleteAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+            adsRepository.deleteById(adsId);
+        } else {
+            throw new RuntimeException("Вы не можете удалять чужие объявления");
+        }
     }
 
     /**
@@ -167,13 +176,16 @@ public class AdsServiceImpl implements AdsService {
         }
 
         AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        updateAd.setTitle(createAds.getTitle());
-        updateAd.setPrice(createAds.getPrice());
-        updateAd.setDescription(createAds.getDescription());
+        if (updateAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+            updateAd.setTitle(createAds.getTitle());
+            updateAd.setPrice(createAds.getPrice());
+            updateAd.setDescription(createAds.getDescription());
 
-        adsRepository.save(updateAd);
+            adsRepository.save(updateAd);
 
-        return adsMapper.toAdsDto(updateAd);
+            return adsMapper.toAdsDto(updateAd);
+        }
+        throw new RuntimeException("Вы не можете изменять чужие объявления");
     }
 
     /**
@@ -210,12 +222,17 @@ public class AdsServiceImpl implements AdsService {
             throw new RuntimeException("Ошибка при загрузке фото");
         }
 
-        int imageId = adImage.getId();
-        imageService.deleteImage(imageId);
+        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        if (updateAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
 
-        AdsEntity ad = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        ad.setImageEntity(adImage);
-        adsRepository.save(ad);
-        return adsMapper.toAdsDto(ad).getImage();
+            int imageId = adImage.getId();
+            imageService.deleteImage(imageId);
+
+            updateAd.setImageEntity(adImage);
+            adsRepository.save(updateAd);
+            return adsMapper.toAdsDto(updateAd).getImage();
+        }
+
+        throw new RuntimeException("Вы не можете изменять чужие объявления");
     }
 }
