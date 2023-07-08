@@ -17,7 +17,7 @@ public interface AdsService {
     void deleteAds(Integer adsId);
     Ads updateAds(CreateAds createAds, Integer adsId);
     Collection<Ads> getAdsMe(Authentication authentication);
-    String updateImage(Integer adsId, MultipartFile image)throws IOException;
+    void updateImage(Integer adsId, MultipartFile image)throws IOException;
     byte[] getAdsImage(Integer adId);
     FullAds getFullAd(Integer adId);
 }

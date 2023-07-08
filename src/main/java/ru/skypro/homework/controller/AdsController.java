@@ -332,10 +332,11 @@ public class AdsController {
                     )
             }
     )
-    @PreAuthorize("@adsServiceImpl.getFullAd(#id).email == authentication.name or hasRole('ADMIN')")
+  //  @PreAuthorize("@adsServiceImpl.getFullAd(#id).email == authentication.name or hasRole('ADMIN')")
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> updateImageAd(@PathVariable Integer id, @RequestPart MultipartFile image) throws IOException {
-        return ResponseEntity.ok(adsService.updateImage(id, image));
+    public ResponseEntity<?> updateImageAd(@PathVariable Integer id, @RequestPart MultipartFile image) throws IOException {
+        adsService.updateImage(id, image);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(

@@ -211,31 +211,22 @@ public class AdsServiceImpl implements AdsService {
      */
     @Transactional
     @Override
-    public String updateImage(Integer adsId, MultipartFile image) {
+    public void updateImage(Integer adsId, MultipartFile image) {
         logger.info("Вызван метод обновления картинки объявления");
         if (adsId == null) {
             throw new RuntimeException("Такого объявления не существует!");
         }
-
         ImageEntity adImage;
         try {
             adImage = imageService.downloadImage(image);
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при загрузке фото");
         }
-
         AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        if (updateAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail())) { // можно добавить: или  userDetails.getUserSecurity().getRole() == Role.ADMIN
-
-            int imageId = adImage.getId();
-            imageService.deleteImage(imageId);
-
-            updateAd.setImageEntity(adImage);
-            adsRepository.save(updateAd);
-            return adsMapper.toAdsDto(updateAd).getImage();
-        }
-
-        throw new RuntimeException("Вы не можете изменять чужие объявления");
+//        int imageId = adImage.getId();
+        updateAd.setImageEntity(adImage);
+        adsRepository.save(updateAd);
+//        imageService.deleteImage(imageId);
     }
 
     /** Получение картинки объявления
@@ -250,14 +241,14 @@ public class AdsServiceImpl implements AdsService {
         return imageService.getImage(adsRepository.findById(adId).orElseThrow(ObjectAbsenceException::new).getImageEntity().getId());
     }
 
-    /** Gолучение полной информации об объявлении
+    /** Получение полной информации по объявлению
      *
      * @param adId идентификатор объявления
      * @return полной информации об объявлении
      */
     @Override
     public FullAds getFullAd(Integer adId) {
-        log.info("Request to get full info about ad");
+        log.info("вызван метод получения полной информации по объявлению");
         AdsEntity ad = adsRepository.findById(adId).orElseThrow(ObjectAbsenceException::new);
         return adsMapper.toFullAdsDto(ad);
     }
