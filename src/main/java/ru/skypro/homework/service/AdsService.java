@@ -17,4 +17,5 @@ public interface AdsService {
     Ads updateAds(CreateAds createAds, Integer adsId);
     Collection<Ads> getAdsMe(Authentication authentication);
     String updateImage(Integer adsId, MultipartFile image);
+    byte[] getAdImage(Integer adsId);
 }

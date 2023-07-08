@@ -1,6 +1,7 @@
 package ru.skypro.homework.entity;
 
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 
@@ -46,6 +47,7 @@ public class AdsEntity {
      */
     @OneToOne
     @JoinColumn(name = "image_id")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private ImageEntity imageEntity;
 
 }

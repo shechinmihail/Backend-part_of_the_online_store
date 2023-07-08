@@ -16,7 +16,9 @@ import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 
 /**
@@ -117,4 +119,17 @@ public class UserServiceImpl implements UserService {
         userEntity.setImageEntity(imageEntity);
         userRepository.save(userEntity);
     }
+
+    @Override
+    public byte[] getUserImage(Integer userId) throws IOException {
+        log.info("Request to getting image");
+        UserEntity user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
+        if (user.getImageEntity() != null) {
+            return user.getImageEntity().getData();
+        } else {
+            File emptyAvatar = new File("src/main/resources/static/emptyAvatar.png");
+            return Files.readAllBytes(emptyAvatar.toPath());
+        }
+    }
+
 }

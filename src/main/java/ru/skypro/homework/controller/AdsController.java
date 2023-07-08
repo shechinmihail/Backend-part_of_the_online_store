@@ -308,4 +308,9 @@ public class AdsController {
 
         return ResponseEntity.ok(adsService.updateImage(id, image));
     }
+
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id){
+        return ResponseEntity.ok(adsService.getAdImage(id));
+    }
 }

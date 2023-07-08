@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.dto.ResponseWrapperComment;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
@@ -17,6 +18,7 @@ import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.security.MyUserDetails;
 import ru.skypro.homework.service.CommentService;
 
 import javax.validation.constraints.NotNull;
@@ -54,6 +56,8 @@ public class CommentServiceImpl implements CommentService {
      * Поле маппинга комментариев
      */
     private final CommentMapper commentMapper;
+
+    private final MyUserDetails userDetails;
 
     /**
      * Конструктор - создание нового объекта репозитория
@@ -120,7 +124,10 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Integer adsId, Integer commentId) {
         logger.info("Вызван метод удаления комментария по идентификатору (id)");
-        commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
+        CommentEntity deleteComment = commentRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        if (deleteComment.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+            commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
+        }
     }
 
     /**
@@ -136,8 +143,13 @@ public class CommentServiceImpl implements CommentService {
     public Comment updateComment(Integer adsId, @NotNull Integer commentId, Comment comment) {
         logger.info("Вызван метод обновления комментария по идентификатору (id)");
         CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId);
-        updateCommentEntity.setText(comment.getText());
-        commentRepository.save(updateCommentEntity);
-        return commentMapper.toDto(updateCommentEntity);
+
+        if (updateCommentEntity.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+            updateCommentEntity.setText(comment.getText());
+            commentRepository.save(updateCommentEntity);
+            return commentMapper.toDto(updateCommentEntity);
+        }
+
+        throw new RuntimeException("Вы не можете редактировать чужой комментарий");
     }
 }

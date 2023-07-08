@@ -225,8 +225,8 @@ public class AdsServiceImpl implements AdsService {
         AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
         if (updateAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
 
-            int imageId = adImage.getId();
-            imageService.deleteImage(imageId);
+//            int imageId = adImage.getId();
+//            imageService.deleteImage(imageId);
 
             updateAd.setImageEntity(adImage);
             adsRepository.save(updateAd);
@@ -234,5 +234,11 @@ public class AdsServiceImpl implements AdsService {
         }
 
         throw new RuntimeException("Вы не можете изменять чужие объявления");
+    }
+
+    @Override
+    public byte[] getAdImage(Integer adsId) {
+        log.info("Get image of an AD with a ID:" + adsId);
+        return imageService.getImage(adsRepository.findById(adsId).orElseThrow(RuntimeException::new).getImageEntity().getId());
     }
 }
