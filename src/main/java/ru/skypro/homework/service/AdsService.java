@@ -11,7 +11,7 @@ import java.util.Collection;
 
 public interface AdsService {
     Collection<Ads> getAllAds(String title);
-    Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication);
+    Ads createAds(CreateAds createAds, MultipartFile image);
     FullAds getAds(Integer adId);
     void deleteAds(Integer adId);
     Ads updateAds(CreateAds createAds, Integer adId);

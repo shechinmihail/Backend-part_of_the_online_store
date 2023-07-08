@@ -110,18 +110,18 @@ public class AdsServiceImpl implements AdsService {
      *
      * @param createAds      данные объявления
      * @param image          картинка объявления
-     * @param authentication авторизованный пользователь
+
      * @return добавленное новое объявление
      */
     @Override
-    public Ads createAds(CreateAds createAds, MultipartFile image, Authentication authentication) {
+    public Ads createAds(CreateAds createAds, MultipartFile image) {
         if (createAds.getPrice() < 0) {
             throw new IllegalArgumentException("Цена должна быть больше 0!");
         }
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        adsEntity.setAuthor(userService.getUser(authentication));
+        adsEntity.setAuthor(userService.getNameUser(myUserDetails.getUsername()));
 
         ImageEntity adImage;
         try {

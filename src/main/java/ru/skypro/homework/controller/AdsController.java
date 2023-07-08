@@ -102,9 +102,8 @@ public class AdsController {
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //POST http://localhost:8080/ads
     public ResponseEntity<Ads> createAds(@RequestPart("properties") @NonNull CreateAds createAds,
-                                         @RequestPart MultipartFile image,
-                                         @NonNull Authentication authentication) {
-        return ResponseEntity.ok(adsService.createAds(createAds, image, authentication));
+                                         @RequestPart MultipartFile image) {
+        return ResponseEntity.ok(adsService.createAds(createAds, image));
     }
 
     /**
