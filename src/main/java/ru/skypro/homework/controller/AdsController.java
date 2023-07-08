@@ -10,14 +10,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -259,53 +262,105 @@ public class AdsController {
         return ResponseEntity.ok(ads);
     }
 
-    /**
-     * Функция обновления картинки объявления
-     *
-     * @param id    идентификатор объявления, не может быть null
-     * @param image картинка объявления
-     * @return обновленная картинка объявления
-     */
+    //    /**
+//     * Функция обновления картинки объявления
+//     *
+//     * @param id    идентификатор объявления, не может быть null
+//     * @param image картинка объявления
+//     * @return обновленная картинка объявления
+//     */
+//    @Operation(
+//            summary = "Обновление картинки объявления",
+//            responses = {
+//                    @ApiResponse(
+//                            responseCode = "200",
+//                            description = "ОК",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = Ads.class)
+//                            )
+//                    ),
+//                    @ApiResponse(
+//                            responseCode = "401",
+//                            description = "Неавторизованный пользователь",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = Ads.class))
+//                    ),
+//                    @ApiResponse(
+//                            responseCode = "403",
+//                            description = "Запрещенный пользователь",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = NewPassword.class)
+//                            )
+//                    ),
+//                    @ApiResponse(
+//                            responseCode = "404",
+//                            description = "Объявление не найдено",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = Ads.class))
+//                    )
+//            }
+//    )
+//    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    //PATCH http://localhost:8080/abs/{id}/image
+//    public ResponseEntity<String> updateImage(@PathVariable int id,
+//                                              @RequestPart MultipartFile image) {
+//
+//        return ResponseEntity.ok(adsService.updateImage(id, image));
+//    }
     @Operation(
             summary = "Обновление картинки объявления",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "ОК",
+                            description = "OK",
                             content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Ads.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Неавторизованный пользователь",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Ads.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Запрещенный пользователь",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = NewPassword.class)
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE
+                                   // schema = @Schema(implementation = AdsDTO.class)
                             )
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "Объявление не найдено",
+                            description = "Error updating ad image",
                             content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Ads.class))
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE
+                                  //  schema = @Schema(implementation = AdsDTO.class)
+                            )
                     )
             }
     )
+    @PreAuthorize("@adsServiceImpl.getFullAd(#id).email == authentication.name or hasRole('ADMIN')")
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    //PATCH http://localhost:8080/abs/{id}/image
-    public ResponseEntity<String> updateImage(@PathVariable int id,
-                                              @RequestPart MultipartFile image) {
-
+    public ResponseEntity<String> updateImageAd(@PathVariable Integer id, @RequestPart MultipartFile image) throws IOException {
         return ResponseEntity.ok(adsService.updateImage(id, image));
+    }
+
+    @Operation(
+            summary = "Получение картинки объявления",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "OK",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ImageEntity.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Image by id not received",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ImageEntity.class)
+                            )
+                    )
+            }
+    )
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id) {
+        return ResponseEntity.ok(adsService.getAdsImage(id));
     }
 }

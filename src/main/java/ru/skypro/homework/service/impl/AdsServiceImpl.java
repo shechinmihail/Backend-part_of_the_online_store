@@ -15,6 +15,7 @@ import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.ObjectAbsenceException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserRepository;
@@ -208,6 +209,7 @@ public class AdsServiceImpl implements AdsService {
      * @param image          картинка объявления
      * @return объявление с новой картинкой
      */
+    @Transactional
     @Override
     public String updateImage(Integer adsId, MultipartFile image) {
         logger.info("Вызван метод обновления картинки объявления");
@@ -223,7 +225,7 @@ public class AdsServiceImpl implements AdsService {
         }
 
         AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        if (updateAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+        if (updateAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail())) { // можно добавить: или  userDetails.getUserSecurity().getRole() == Role.ADMIN
 
             int imageId = adImage.getId();
             imageService.deleteImage(imageId);
@@ -234,5 +236,29 @@ public class AdsServiceImpl implements AdsService {
         }
 
         throw new RuntimeException("Вы не можете изменять чужие объявления");
+    }
+
+    /** Получение картинки объявления
+     *
+     * @param adId идентификатор объявления
+     * @return объявление с картинкой
+     */
+    @Transactional
+    @Override
+    public byte[] getAdsImage(Integer adId) {
+        log.info("Вызван метод получения картинки объявления");
+        return imageService.getImage(adsRepository.findById(adId).orElseThrow(ObjectAbsenceException::new).getImageEntity().getId());
+    }
+
+    /** Gолучение полной информации об объявлении
+     *
+     * @param adId идентификатор объявления
+     * @return полной информации об объявлении
+     */
+    @Override
+    public FullAds getFullAd(Integer adId) {
+        log.info("Request to get full info about ad");
+        AdsEntity ad = adsRepository.findById(adId).orElseThrow(ObjectAbsenceException::new);
+        return adsMapper.toFullAdsDto(ad);
     }
 }

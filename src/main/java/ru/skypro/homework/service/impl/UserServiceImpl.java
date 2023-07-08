@@ -10,14 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
-import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.ObjectAbsenceException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
+import java.io.File;
 import java.io.IOException;
-
+import java.nio.file.Files;
 
 /**
  * UserServiceImpl
@@ -113,8 +114,29 @@ public class UserServiceImpl implements UserService {
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
         UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
-        ImageEntity imageEntity = imageService.downloadImage(image);
-        userEntity.setImageEntity(imageEntity);
+//        ImageEntity imageEntity = imageService.downloadImage(image);
+//        userEntity.setImageEntity(imageEntity);
+//        userRepository.save(userEntity);
+        userEntity.setImageEntity(imageService.downloadImage(image));
         userRepository.save(userEntity);
+        //   userMapper.toDTO(userEntity);
+    }
+
+    /** Получить аватар авторизованного пользователя
+     *
+     * @param userId идентификатор пользователя, не может быть null
+     * @return аватар
+     * @throws IOException
+     */
+    @Override
+    public byte[] getUserImage(Integer userId) throws IOException {
+        log.info("Вызван метод получения аватара авторизованного пользователя");
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(ObjectAbsenceException::new);
+        if (userEntity.getImageEntity() != null) {
+            return userEntity.getImageEntity().getData();
+        } else {
+            File emptyAvatar = new File("src/main/resources/static/emptyAvatar.png");
+            return Files.readAllBytes(emptyAvatar.toPath());
+        }
     }
 }

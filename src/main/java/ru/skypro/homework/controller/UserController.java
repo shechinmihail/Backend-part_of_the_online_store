@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
+import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
@@ -140,35 +141,101 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(user, authentication));
     }
 
-    /**
-     * Обновить аватар авторизованного пользователя
+//    /**
+//     * Обновить аватар авторизованного пользователя
+//     *
+//     * @param image аватар авторизованного пользователя
+//     * @return обновленный аватар авторизованного пользователя
+//     */
+//    @Operation(
+//            summary = "Обновить аватар авторизованного пользователя",
+//            responses = {
+//                    @ApiResponse(
+//                            responseCode = "200",
+//                            description = "ОК",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = MultipartFile.class)
+//                            )
+//                    ),
+//                    @ApiResponse(
+//                            responseCode = "401",
+//                            description = "Unauthorized",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = MultipartFile.class))
+//                    )
+//            }
+//    )
+//    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image, Authentication authentication) throws IOException {
+//        userService.updateUserImage(image, authentication);
+//        return ResponseEntity.ok().build();
+//    }
+
+    /**Обновить аватар авторизованного пользователя
      *
-     * @param image аватар авторизованного пользователя
-     * @return обновленный аватар авторизованного пользователя
+     * @param image картинка/аватарка
+     * @param authentication авторизованный пользователь
+     * @return новая аватарка
+     * @throws IOException
      */
     @Operation(
             summary = "Обновить аватар авторизованного пользователя",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "ОК",
+                            description = "OK",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = MultipartFile.class)
+                                    schema = @Schema(implementation = ImageEntity.class)
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized",
+                            responseCode = "404",
+                            description = "User avatar update error",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = MultipartFile.class))
+                                    schema = @Schema(implementation = ImageEntity.class)
+                            )
                     )
             }
     )
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image, Authentication authentication) throws IOException {
+    public ResponseEntity<?> updateAvatar(@RequestPart MultipartFile image, Authentication authentication) throws IOException {
         userService.updateUserImage(image, authentication);
         return ResponseEntity.ok().build();
+    }
+
+    /**Получить аватар авторизованного пользователя
+     *
+     * @param id идентификатор пользователя, не может быть null
+     * @return аватарка
+     * @throws IOException
+     */
+    @Operation(
+            summary = "Получить аватар авторизованного пользователя",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "OK",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ImageEntity.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "User avatar getting error",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ImageEntity.class)
+                            )
+                    )
+            }
+    )
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id) throws IOException {
+        return ResponseEntity.ok(userService.getUserImage(id));
     }
 }
