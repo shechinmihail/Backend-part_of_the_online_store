@@ -204,10 +204,8 @@ public class AdsServiceImpl implements AdsService {
 
     /**
      * Обновление картинки объявления
-     *
      * @param adsId          идентификатор объявления, не может быть null
      * @param image          картинка объявления
-     * @return объявление с новой картинкой
      */
     @Transactional
     @Override
