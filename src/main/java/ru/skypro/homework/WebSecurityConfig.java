@@ -9,6 +9,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,7 +38,10 @@ public class WebSecurityConfig {
                                     .mvcMatchers(AUTH_WHITELIST).permitAll() // резрешены без авторизации
                                     .mvcMatchers(HttpMethod.GET, "/ads", "/ads/*/image", "/users/*/image").permitAll() // резрешены без авторизации
                                     .mvcMatchers("/ads/**", "/users/**").authenticated()) // требуют авторизации
-            .cors().and().httpBasic(withDefaults());
+            .cors()
+            .and()
+            .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .httpBasic(withDefaults());
     return http.build();
   }
 

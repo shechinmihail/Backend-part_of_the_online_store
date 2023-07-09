@@ -47,7 +47,6 @@ public class AdsEntity {
      */
     @OneToOne
     @JoinColumn(name = "image_id")
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private ImageEntity imageEntity;
 
 }

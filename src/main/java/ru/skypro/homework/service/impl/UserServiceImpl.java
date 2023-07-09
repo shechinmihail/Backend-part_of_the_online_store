@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,8 @@ public class UserServiceImpl implements UserService {
 
     private final ImageServiceImpl imageService;
 
+    private final PasswordEncoder passwordEncoder;
+
     /**
      * Конструктор - создание нового объекта репозитория
      *
@@ -70,7 +73,7 @@ public class UserServiceImpl implements UserService {
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
         UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
-        userEntity.setPassword(newPassword.getNewPassword());
+        userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
         userRepository.save(userEntity);
         userMapper.toDto(userEntity);
     }
@@ -116,6 +119,7 @@ public class UserServiceImpl implements UserService {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
         UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
         ImageEntity imageEntity = imageService.downloadImage(image);
+        imageService.deleteImage(userEntity.getImageEntity().getId());
         userEntity.setImageEntity(imageEntity);
         userRepository.save(userEntity);
     }

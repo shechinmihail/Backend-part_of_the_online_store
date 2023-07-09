@@ -124,8 +124,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Integer adsId, Integer commentId) {
         logger.info("Вызван метод удаления комментария по идентификатору (id)");
-        CommentEntity deleteComment = commentRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        if (deleteComment.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+        if (isOwner(adsId, commentId, userDetails)) {
             commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
         }
     }
@@ -144,12 +143,20 @@ public class CommentServiceImpl implements CommentService {
         logger.info("Вызван метод обновления комментария по идентификатору (id)");
         CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId);
 
-        if (updateCommentEntity.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+        if (isOwner(adsId, commentId, userDetails)) {
             updateCommentEntity.setText(comment.getText());
             commentRepository.save(updateCommentEntity);
             return commentMapper.toDto(updateCommentEntity);
         }
 
         throw new RuntimeException("Вы не можете редактировать чужой комментарий");
+    }
+
+    private boolean isOwner(Integer adsId, Integer commentId, MyUserDetails details) {
+        if (commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId).getAuthor().getEmail().equals(details.getUserSecurity().getEmail()) || details.getUserSecurity().getRole() == Role.ADMIN) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
