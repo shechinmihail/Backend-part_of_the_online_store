@@ -18,12 +18,12 @@ public class MyUserDetails implements UserDetails {
 
     private UserSecurity userSecurity;
 
-    public void setUserSecurity(UserSecurity userSecurity) {
-        this.userSecurity = userSecurity;
+    public UserSecurity getUserSecurity() {
+        return userSecurity;
     }
 
-    public Integer getUserId() {
-        return Optional.ofNullable(userSecurity).map(UserSecurity::getId).orElse(null);
+    public void setUserSecurity(UserSecurity userSecurity) {
+        this.userSecurity = userSecurity;
     }
 
     @Override
@@ -67,6 +67,6 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

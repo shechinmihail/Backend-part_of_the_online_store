@@ -7,6 +7,7 @@ import ru.skypro.homework.dto.LoginReq;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.dto.UserSecurity;
+import ru.skypro.homework.dto.UserSecurity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
 
@@ -19,7 +20,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", expression = "java(ru.skypro.homework.dto.Role.USER)")
 //    @Mapping(target = "role", defaultValue = "USER")
-    @Mapping(target = "imageEntity", source = "image")
+    //@Mapping(target = "image", source = "image")
     UserEntity toEntity(User userDto);
 
     UserEntity toEntity(LoginReq loginReq);
@@ -27,11 +28,11 @@ public interface UserMapper {
     ImageEntity map(String value);
 
     @Mapping(target = "email", source = "username")
-    UserEntity toEntity(RegisterReq registerReqDto);
+    UserEntity toEntityFromReq(RegisterReq registerReqDto);
+
+    UserSecurity toSecurityDTO(UserEntity userEntity);
 
     default String imageMap(UserEntity userEntity) {
         return "/users/"+ userEntity.getId() + "/image";
     }
-
-    UserSecurity toSecurityDTO(UserEntity userEntity);
 }

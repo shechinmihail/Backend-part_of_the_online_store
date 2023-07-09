@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.NotNull;
-
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Контроллер AdsController
@@ -30,7 +32,6 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ads")
-@Tag(name = "Ads")
 public class AdsController {
 
     /**
@@ -66,7 +67,7 @@ public class AdsController {
             }
 
     )
-    @GetMapping(path = "/all")  //GET http://localhost:8080/ads/all
+    @GetMapping  //GET http://localhost:8080/ads
     public ResponseEntity<ResponseWrapperAds<Ads>> getAllAds(@RequestParam(required = false) String title) {
         ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAllAds(title));
         return ResponseEntity.ok(ads);
@@ -100,10 +101,11 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //POST http://localhost:8080/ads
-    public ResponseEntity<Ads> createAds(@RequestPart("properties") @NonNull CreateAds createAds,
-                                         @RequestPart MultipartFile image) {
-        return ResponseEntity.ok(adsService.createAds(createAds, image));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //POST http://localhost:8080/abs
+    public ResponseEntity<Ads> createAds(@RequestPart("properties") @NotNull CreateAds createAds,
+                                         @RequestPart MultipartFile image,
+                                         @NonNull Authentication authentication) {
+        return ResponseEntity.ok(adsService.createAds(createAds, image, authentication));
     }
 
     /**
@@ -141,7 +143,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{id}") //GET http://localhost:8080/ads/{id}
-    public ResponseEntity<FullAds> getAds(@PathVariable int id) {
+    public ResponseEntity<FullAds> getAds(@PathVariable Integer id) {
         return ResponseEntity.ok(adsService.getAds(id));
     }
 
@@ -179,9 +181,9 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}") //DELETE http://localhost:8080/ads/{id}
-    public ResponseEntity<?> deleteAds(@PathVariable int id) {
+    public ResponseEntity<Void> deleteAds(@PathVariable Integer id) {
         adsService.deleteAds(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
@@ -236,6 +238,7 @@ public class AdsController {
     /**
      * Функция получения объявления авторизованного пользователя, хранящихся в базе данных
      *
+     * @param authentication авторизованный пользователь
      * @return возвращает объявление авторизованного пользователя
      */
     @Operation(
@@ -259,8 +262,8 @@ public class AdsController {
             }
     )
     @GetMapping("/me") //GET http://localhost:8080/ads/me
-    public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe() {
-        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe());
+    public ResponseEntity<ResponseWrapperAds<Ads>> getAdsMe(Authentication authentication) {
+        ResponseWrapperAds<Ads> ads = new ResponseWrapperAds<>(adsService.getAdsMe(authentication));
         return ResponseEntity.ok(ads);
     }
 
