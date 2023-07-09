@@ -115,7 +115,7 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new); //TODO сделать свое исключение
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(ObjectAbsenceException::new); //TODO сделать свое исключение - добавила!
         adsEntity.setAuthor(author);
 
         ImageEntity adImage;

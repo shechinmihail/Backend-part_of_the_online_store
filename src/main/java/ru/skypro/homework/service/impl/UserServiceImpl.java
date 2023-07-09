@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,20 +44,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     private final ImageServiceImpl imageService;
+    private final PasswordEncoder encoder;
 
-    /**
-     * Конструктор - создание нового объекта репозитория
-     *
-     * @param userRepository
-     * @param userMapper
-     * @param imageService
-     * @see UserRepository (UserRepository)
-     */
-//    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
-//        this.userRepository = userRepository;
-//        this.userMapper = userMapper;
-//        this.imageService = imageService;
-//    }
 
     /**
      * Обновление пароля пользователя
@@ -68,8 +57,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
-        userEntity.setPassword(newPassword.getNewPassword());
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(ObjectAbsenceException::new);
+        userEntity.setPassword(encoder.encode(newPassword.getNewPassword()));
         userRepository.save(userEntity);
         userMapper.toDto(userEntity);
     }
@@ -96,7 +85,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();//TODO надо сделать исключение
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(ObjectAbsenceException::new);//TODO надо сделать исключение - добавила
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setPhone(user.getPhone());
@@ -113,7 +102,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(ObjectAbsenceException::new); // TODO сделать исключение -добавила!
 //        ImageEntity imageEntity = imageService.downloadImage(image);
 //        userEntity.setImageEntity(imageEntity);
 //        userRepository.save(userEntity);
