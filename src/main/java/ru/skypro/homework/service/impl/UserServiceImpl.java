@@ -44,23 +44,15 @@ public class UserServiceImpl implements UserService {
      */
     private final UserMapper userMapper;
 
+    /**
+     * Поле сервиса изображения
+     */
     private final ImageServiceImpl imageService;
 
-    private final PasswordEncoder passwordEncoder;
-
     /**
-     * Конструктор - создание нового объекта репозитория
-     *
-     * @param userRepository
-     * @param userMapper
-     * @param imageService
-     * @see UserRepository (UserRepository)
+     * Поле кодировки пароля
      */
-//    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
-//        this.userRepository = userRepository;
-//        this.userMapper = userMapper;
-//        this.imageService = imageService;
-//    }
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Обновление пароля пользователя
@@ -119,21 +111,27 @@ public class UserServiceImpl implements UserService {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
         UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
         ImageEntity imageEntity = imageService.downloadImage(image);
-        imageService.deleteImage(userEntity.getImageEntity().getId());
+        //imageService.deleteImage(userEntity.getImageEntity().getId());
         userEntity.setImageEntity(imageEntity);
         userRepository.save(userEntity);
     }
 
+    /**
+     * Получение аватарки пользователя
+     *
+     * @param userId идентификатор авторизованного пользователя, не может быть null
+     * @return аватар авторизованного пользователя
+     * @throws IOException в случае отсутствия пользователя в базе
+     */
     @Override
     public byte[] getUserImage(Integer userId) throws IOException {
-        log.info("Request to getting image");
+        logger.info("Вызван метод получения аватара пользователя");
         UserEntity user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
         if (user.getImageEntity() != null) {
             return user.getImageEntity().getData();
         } else {
-            File emptyAvatar = new File("src/main/resources/static/emptyAvatar.png");
+            File emptyAvatar = new File("src/main/resources/imageAvatars/emptyAvatar.png");
             return Files.readAllBytes(emptyAvatar.toPath());
         }
     }
-
 }

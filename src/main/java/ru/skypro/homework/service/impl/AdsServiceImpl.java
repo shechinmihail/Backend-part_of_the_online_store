@@ -12,7 +12,6 @@ import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateAds;
 import ru.skypro.homework.dto.FullAds;
 import ru.skypro.homework.dto.Role;
-import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
@@ -22,13 +21,11 @@ import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.security.MyUserDetails;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Сервис AdsServiceImpl
@@ -48,51 +45,34 @@ public class AdsServiceImpl implements AdsService {
     private final AdsRepository adsRepository;
 
     /**
-     * Поле маппинга объявлении
-     */
-    private final AdsMapper adsMapper;
-
-    /**
      * Поле репозитория пользователя
      */
     private final UserRepository userRepository;
 
     /**
+     * Поле репозитория комментариев
+     */
+    private final CommentRepository commentRepository;
+
+    /**
+     * Поле маппинга объявлении
+     */
+    private final AdsMapper adsMapper;
+
+    /**
      * Поле сервиса пользователя
      */
     private final UserService userService;
-    private final ImageService imageService;
-    private final CommentService commentService;
-
-    private final MyUserDetails userDetails;
-
-    private final CommentRepository commentRepository;
-
 
     /**
-     * Конструктор - создание нового объекта репозитория
-     *
-     * @param adsRepository  репозиторий объявления
-     * @param adsMapper
-     * @param userRepository репозиторий пользователя
-     * @param userService    сервис пользователя
-     * @param userMapper
-     * @param imageService
-     * @param commentService
-     * @param myUserDetails
-     * @see AdsRepository(AdsRepository)
+     * Поле сервиса картинки
      */
+    private final ImageService imageService;
 
-//    public AdsServiceImpl(AdsRepository adsRepository, AdsMapper adsMapper, UserRepository userRepository, UserService userService,
-//                          ImageService imageService, CommentService commentService, MyUserDetails myUserDetails) {
-//        this.adsRepository = adsRepository;
-//        this.adsMapper = adsMapper;
-//        this.userRepository = userRepository;
-//        this.userService = userService;
-//        this.imageService = imageService;
-//        this.commentService = commentService;
-//        this.myUserDetails = myUserDetails;
-//    }
+    /**
+     * Поле проверки авторизации
+     */
+    private final MyUserDetails userDetails;
 
     /**
      * Получение списка всех объявлений из базы данных
@@ -175,8 +155,8 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Обновление объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId          идентификатор объявления, не может быть null
-     * @param createAds      данные объявления
+     * @param adsId     идентификатор объявления, не может быть null
+     * @param createAds данные объявления
      * @return возвращает обновленное объявление по идентификатору (id)
      */
     @Override
@@ -218,8 +198,8 @@ public class AdsServiceImpl implements AdsService {
     /**
      * Обновление картинки объявления
      *
-     * @param adsId          идентификатор объявления, не может быть null
-     * @param image          картинка объявления
+     * @param adsId идентификатор объявления, не может быть null
+     * @param image картинка объявления
      * @return объявление с новой картинкой
      */
     @Override
@@ -245,11 +225,17 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public byte[] getAdImage(Integer adsId) {
-        logger.info("Вызван метод получения картинки объявления по идентификатору (id)");
-        log.info("Get image of an AD with a ID:" + adsId);
+        logger.info("Вызван метод получения картинки объявления по идентификатору (id) " + adsId);
         return imageService.getImage(adsRepository.findById(adsId).orElseThrow(RuntimeException::new).getImageEntity().getId());
     }
 
+    /**
+     * Проверка владельца объявления
+     *
+     * @param ad объявление пользователя
+     * @param details авторизация пользователя
+     * @return true если пользователь действительно собственник объявления, false если нет
+     */
     private boolean isOwner(AdsEntity ad, MyUserDetails details) {
         if (ad.getAuthor().getEmail().equals(details.getUserSecurity().getEmail()) || details.getUserSecurity().getRole() == Role.ADMIN) {
             return true;

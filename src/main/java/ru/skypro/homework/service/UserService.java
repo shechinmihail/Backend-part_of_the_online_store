@@ -5,9 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
-import ru.skypro.homework.entity.UserEntity;
 
 import java.io.IOException;
+
+/**
+ * Интерфейс UserService
+ */
 @Service
 public interface UserService {
 
@@ -18,8 +21,6 @@ public interface UserService {
     User updateUser(User user, Authentication authentication);
 
     void updateUserImage(MultipartFile image, Authentication authentication) throws IOException;
-
-    UserEntity getNameUser(String email);
 
     byte[] getUserImage(Integer userId) throws IOException;
 }
