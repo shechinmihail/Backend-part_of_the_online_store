@@ -15,12 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Контроллер AdsController
@@ -135,7 +132,7 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping("/{id}") //GET http://localhost:8080/abs/{id}
+    @GetMapping("/{id}")
     public ResponseEntity<FullAds> getAds(@PathVariable Integer id) {
         return ResponseEntity.ok(adsService.getAds(id));
     }
@@ -173,7 +170,7 @@ public class AdsController {
                     )
             }
     )
-    @DeleteMapping("/{id}") //DELETE http://localhost:8080/abs/{id}
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAds(@PathVariable Integer id) {
         adsService.deleteAds(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -222,7 +219,7 @@ public class AdsController {
                     )
             }
     )
-    @PatchMapping("/{id}") //PATCH http://localhost:8080/abs/{id}
+    @PatchMapping("/{id}")
     public ResponseEntity<Ads> updateAds(@PathVariable int id,
                                          @RequestBody CreateAds createAds) {
         return ResponseEntity.ok(adsService.updateAds(createAds, id));
