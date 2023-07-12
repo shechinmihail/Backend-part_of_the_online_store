@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.CreateComment;
 import ru.skypro.homework.dto.ResponseWrapperComment;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
@@ -17,6 +18,7 @@ import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.security.MyUserDetails;
 import ru.skypro.homework.service.CommentService;
 
 import javax.validation.constraints.NotNull;
@@ -55,6 +57,8 @@ public class CommentServiceImpl implements CommentService {
      */
     private final CommentMapper commentMapper;
 
+    private final MyUserDetails userDetails;
+
     /**
      * Конструктор - создание нового объекта репозитория
      *
@@ -73,15 +77,15 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Позволяет получить все комментарии к определенному объявлению
-     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getCommentEntitiesByAd_Id(Integer)}
+     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getByAdsId(Integer)}
      *
-     * @param adId идентификатор объявления, не может быть null
+     * @param adsId идентификатор объявления, не может быть null
      * @return возвращает все комментарии к определенному объявлению
      */
     @Override
-    public ResponseWrapperComment getComments(Integer adId) {
+    public ResponseWrapperComment getComments(Integer adsId) {
         logger.info("Вызван метод получения всех комментариев к определенному объявлению");
-        Collection<CommentEntity> comments = commentRepository.getCommentEntitiesByAd_Id(adId);
+        Collection<CommentEntity> comments = commentRepository.getCommentEntitiesByAd_Id(adsId);
         ResponseWrapperComment responseWrapperComment = new ResponseWrapperComment();
         responseWrapperComment.setResults(commentMapper.commentsEntityToCommentsDtoCollection(comments));
         return responseWrapperComment;
@@ -97,10 +101,10 @@ public class CommentServiceImpl implements CommentService {
      * @return возвращает добавленный комментарий
      */
     @Override
-    public Comment addComment(@NotNull Integer adId, CreateComment createComment, Authentication authentication) {
+    public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
         CommentEntity commentEntity = commentMapper.toEntity(createComment);
-        AdsEntity adsEntity = adsRepository.findById(adId).orElseThrow(RuntimeException::new);
+        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
         UserEntity author = userRepository.getUserEntitiesByEmail(authentication.getName());
         commentEntity.setAd(adsEntity);
         commentEntity.setAuthor(author);
@@ -112,15 +116,17 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Позволяет удалить комментарий
-     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#deleteCommentEntitiesByAd_IdAndId(Integer, Integer)}
+     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#deleteByIdAndAdsId(Integer, Integer)}
      *
      * @param commentId идентификатор комментария, не может быть null
-     * @param adId     идентификатор объявления, не может быть null
+     * @param adsId     идентификатор объявления, не может быть null
      */
     @Override
-    public void deleteComment(Integer adId, Integer commentId) {
+    public void deleteComment(Integer adsId, Integer commentId) {
         logger.info("Вызван метод удаления комментария по идентификатору (id)");
-        commentRepository.deleteCommentEntitiesByAd_IdAndId(adId, commentId);
+        if (isOwner(adsId, commentId, userDetails)) {
+            commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
+        }
     }
 
     /**
@@ -135,19 +141,32 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Позволяет изменить комментарий
-     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getCommentEntityByAd_IdAndId(Integer, Integer)}
+     * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#getByIdAndAdsId(Integer, Integer)}
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param commentId идентификатор комментария, не может быть null
-     * @param comment   измененный комментарий
+     * @param commentId      идентификатор комментария, не может быть null
+     * @param comment        измененный комментарий
      * @return возвращает измененный комментарий
      */
     @Override
-    public Comment updateComment(Integer adId, @NotNull Integer commentId, Comment comment) {
+    public Comment updateComment(Integer adsId, @NotNull Integer commentId, Comment comment) {
         logger.info("Вызван метод обновления комментария по идентификатору (id)");
-        CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adId, commentId);
-        updateCommentEntity.setText(comment.getText());
-        commentRepository.save(updateCommentEntity);
-        return commentMapper.toDto(updateCommentEntity);
+        CommentEntity updateCommentEntity = commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId);
+
+        if (isOwner(adsId, commentId, userDetails)) {
+            updateCommentEntity.setText(comment.getText());
+            commentRepository.save(updateCommentEntity);
+            return commentMapper.toDto(updateCommentEntity);
+        }
+
+        throw new RuntimeException("Вы не можете редактировать чужой комментарий");
+    }
+
+    private boolean isOwner(Integer adsId, Integer commentId, MyUserDetails details) {
+        if (commentRepository.getCommentEntityByAd_IdAndId(adsId, commentId).getAuthor().getEmail().equals(details.getUserSecurity().getEmail()) || details.getUserSecurity().getRole() == Role.ADMIN) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package ru.skypro.homework.entity;
 
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 

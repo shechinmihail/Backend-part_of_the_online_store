@@ -18,6 +18,7 @@ import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -181,7 +182,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}") //DELETE http://localhost:8080/ads/{id}
-    public ResponseEntity<Void> deleteAds(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteAds(@PathVariable Integer id) {
         adsService.deleteAds(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -312,13 +313,12 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //PATCH http://localhost:8080/ads/{id}/image
     public ResponseEntity<String> updateImage(@PathVariable int id,
-                                              @RequestPart MultipartFile image) {
-
+                                              @RequestPart MultipartFile image) throws IOException {
         return ResponseEntity.ok(adsService.updateImage(id, image));
     }
 
     @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> getAdsImage(@PathVariable Integer id) {
-        return ResponseEntity.ok(adsService.getAdsImage(id));
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id){
+        return ResponseEntity.ok(adsService.getAdImage(id));
     }
 }

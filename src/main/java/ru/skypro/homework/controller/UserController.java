@@ -72,7 +72,7 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<?> setNewPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
+    public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
         userService.setNewPassword(newPassword, authentication);
         return ResponseEntity.ok().build();
     }
@@ -105,7 +105,7 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<User> getUser(Authentication authentication) {
-        return ResponseEntity.ok(userService.getUserDTO(authentication));
+        return ResponseEntity.ok(userService.getUser(authentication));
     }
 
     /**
@@ -198,8 +198,9 @@ public class UserController {
                     )
             }
     )
-    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getUserImage(@PathVariable Integer id) throws IOException {
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id) throws IOException {
+        log.info("Get user image with id" + id);
         return ResponseEntity.ok(userService.getUserImage(id));
     }
 }

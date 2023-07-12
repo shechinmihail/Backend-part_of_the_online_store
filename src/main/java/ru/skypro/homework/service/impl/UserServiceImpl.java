@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+
 /**
  * UserServiceImpl
  * Сервис для обновления пароля, информации, аватара и поиска авторизованного пользователя в базе данных
@@ -48,6 +49,20 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
+     * Конструктор - создание нового объекта репозитория
+     *
+     * @param userRepository
+     * @param userMapper
+     * @param imageService
+     * @see UserRepository (UserRepository)
+     */
+//    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ImageServiceImpl imageService) {
+//        this.userRepository = userRepository;
+//        this.userMapper = userMapper;
+//        this.imageService = imageService;
+//    }
+
+    /**
      * Обновление пароля пользователя
      *
      * @param newPassword    новый пароль
@@ -57,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO надо сделать исключение
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
         userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
         userRepository.save(userEntity);
         userMapper.toDto(userEntity);
@@ -70,21 +85,9 @@ public class UserServiceImpl implements UserService {
      * @return информацию об авторизованном пользователе
      */
     @Override
-    public User getUserDTO(Authentication authentication) {
+    public User getUser(Authentication authentication) {
         logger.info("Вызван метод получения информации об авторизованном пользователе");
         return userMapper.toDto(userRepository.getUserEntitiesByEmail(authentication.getName()));
-    }
-
-    /**
-     * Получение информации об авторизованном пользователе
-     *
-     * @param authentication авторизованный пользователь
-     * @return информацию об авторизованном пользователе
-     */
-    @Override
-    public UserEntity getUser(Authentication authentication) {
-        logger.info("Вызван метод получения информации об авторизованном пользователе");
-        return userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO надо сделать исключение
     }
 
     /**
@@ -97,7 +100,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO надо сделать исключение
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();//TODO надо сделать исключение
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setPhone(user.getPhone());
@@ -116,26 +119,21 @@ public class UserServiceImpl implements UserService {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
         UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
         ImageEntity imageEntity = imageService.downloadImage(image);
+        imageService.deleteImage(userEntity.getImageEntity().getId());
         userEntity.setImageEntity(imageEntity);
         userRepository.save(userEntity);
     }
 
     @Override
-    public byte[] getUserImage(Integer authorId) throws IOException {
-        logger.info("Вызван метод получения аватара пользователя");
-        UserEntity userEntity = userRepository.findById(authorId).orElseThrow(); // TODO надо сделать исключение
-        if (userEntity.getImageEntity() != null){
-            return userEntity.getImageEntity().getData();
+    public byte[] getUserImage(Integer userId) throws IOException {
+        log.info("Request to getting image");
+        UserEntity user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
+        if (user.getImageEntity() != null) {
+            return user.getImageEntity().getData();
         } else {
-            File avatar = new File("src/main/resources/imageAvatar/avatar.png");
-            return Files.readAllBytes(avatar.toPath());
+            File emptyAvatar = new File("src/main/resources/static/emptyAvatar.png");
+            return Files.readAllBytes(emptyAvatar.toPath());
         }
     }
-
-    @Override
-    public UserEntity getNameUser(String email) {
-        return userRepository.findByEmailIgnoreCase(email).orElseThrow(); // TODO надо сделать исключение
-    }
-
 
 }

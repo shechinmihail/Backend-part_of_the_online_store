@@ -13,15 +13,13 @@ public interface UserService {
 
     void setNewPassword(NewPassword newPassword, Authentication authentication);
 
-    User getUserDTO(Authentication authentication);
-
-    UserEntity getUser(Authentication authentication);
+    User getUser(Authentication authentication);
 
     User updateUser(User user, Authentication authentication);
 
     void updateUserImage(MultipartFile image, Authentication authentication) throws IOException;
 
-    byte[] getUserImage(Integer authorId) throws IOException;
-
     UserEntity getNameUser(String email);
+
+    byte[] getUserImage(Integer userId) throws IOException;
 }
