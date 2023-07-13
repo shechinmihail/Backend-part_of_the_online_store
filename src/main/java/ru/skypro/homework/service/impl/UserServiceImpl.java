@@ -13,6 +13,7 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
         userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
         userRepository.save(userEntity);
         userMapper.toDto(userEntity);
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow();//TODO надо сделать исключение
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setPhone(user.getPhone());
@@ -105,11 +106,12 @@ public class UserServiceImpl implements UserService {
      *
      * @param image          аватар авторизованного пользователя
      * @param authentication авторизованный пользователь
+     * @throws IOException в случае отсутствия пользователя в базе
      */
     @Override
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(); // TODO сделать исключение
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
         ImageEntity imageEntity = imageService.downloadImage(image);
         //imageService.deleteImage(userEntity.getImageEntity().getId());
         userEntity.setImageEntity(imageEntity);
@@ -126,7 +128,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public byte[] getUserImage(Integer userId) throws IOException {
         logger.info("Вызван метод получения аватара пользователя");
-        UserEntity user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         if (user.getImageEntity() != null) {
             return user.getImageEntity().getData();
         } else {

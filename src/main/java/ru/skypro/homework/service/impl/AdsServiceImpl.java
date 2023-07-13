@@ -15,6 +15,9 @@ import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.AdsNotFoundException;
+import ru.skypro.homework.exception.ObjectException;
+import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
@@ -105,14 +108,14 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new); //TODO сделать свое исключение
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
         adsEntity.setAuthor(author);
 
         ImageEntity adImage;
         try {
             adImage = imageService.downloadImage(image);
         } catch (IOException e) {
-            throw new RuntimeException("Ошибка при загрузке фото");
+            throw new ObjectException("Ошибка при загрузке фото");
         }
 
         adsEntity.setImageEntity(adImage);
@@ -131,24 +134,24 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAds getAds(Integer adsId) {
         logger.info("Вызван метод получения объявления по идентификатору (id)");
-        return adsMapper.toFullAdsDto(adsRepository.findById(adsId).orElseThrow());
+        return adsMapper.toFullAdsDto(adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new));
     }
 
     /**
      * Удаление объявления по идентификатору (id), хранящихся в базе данных
      *
-     * @param adsId          идентификатор объявления, не может быть null
+     * @param adsId идентификатор объявления, не может быть null
      */
     @Override
     public void deleteAds(Integer adsId) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
-        AdsEntity deleteAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        if (deleteAd.getAuthor().getEmail().equals(userDetails.getUserSecurity().getEmail()) || userDetails.getUserSecurity().getRole() == Role.ADMIN) {
+        AdsEntity deleteAd = adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
+        if (isOwner(deleteAd, userDetails)) {
             commentRepository.deleteCommentEntitiesByAd_Id(adsId);
             imageService.deleteImage(deleteAd.getImageEntity().getId());
             adsRepository.deleteById(adsId);
         } else {
-            throw new RuntimeException("Вы не можете удалять чужие объявления");
+            throw new ObjectException("Вы не можете удалять чужие объявления");
         }
     }
 
@@ -161,15 +164,12 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId) {
-        if (adsId == null) {
-            throw new RuntimeException("Такого объявления не существует!");
-        }
 
         if (createAds.getPrice() < 0) {
-            throw new RuntimeException("Цена должна быть больше 0!");
+            throw new ObjectException("Цена должна быть больше 0!");
         }
 
-        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
         if (isOwner(updateAd, userDetails)) {
             updateAd.setTitle(createAds.getTitle());
             updateAd.setPrice(createAds.getPrice());
@@ -179,7 +179,7 @@ public class AdsServiceImpl implements AdsService {
 
             return adsMapper.toAdsDto(updateAd);
         }
-        throw new RuntimeException("Вы не можете изменять чужие объявления");
+        throw new ObjectException("Вы не можете изменять чужие объявления");
     }
 
     /**
@@ -203,9 +203,9 @@ public class AdsServiceImpl implements AdsService {
      * @return объявление с новой картинкой
      */
     @Override
-    public String updateImage(Integer adsId, MultipartFile image) throws IOException{
+    public String updateImage(Integer adsId, MultipartFile image) throws IOException {
         logger.info("Вызван метод обновления картинки объявления");
-        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
         if (isOwner(updateAd, userDetails)) {
             Integer idDeleteImage = updateAd.getImageEntity().getId();
             updateAd.setImageEntity(imageService.downloadImage(image));
@@ -214,7 +214,7 @@ public class AdsServiceImpl implements AdsService {
             return adsMapper.toAdsDto(updateAd).getImage();
         }
 
-        throw new RuntimeException("Вы не можете изменять чужие объявления");
+        throw new ObjectException("Вы не можете изменять чужие объявления");
     }
 
     /**
@@ -226,13 +226,13 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public byte[] getAdImage(Integer adsId) {
         logger.info("Вызван метод получения картинки объявления по идентификатору (id) " + adsId);
-        return imageService.getImage(adsRepository.findById(adsId).orElseThrow(RuntimeException::new).getImageEntity().getId());
+        return imageService.getImage(adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new).getImageEntity().getId());
     }
 
     /**
      * Проверка владельца объявления
      *
-     * @param ad объявление пользователя
+     * @param ad      объявление пользователя
      * @param details авторизация пользователя
      * @return true если пользователь действительно собственник объявления, false если нет
      */

@@ -95,7 +95,7 @@ public class CommentServiceImpl implements CommentService {
      * Позволяет добавить комментарий к определенному объявлению
      * <br> Использован метод репозитория {@link ru.skypro.homework.repository.CommentRepository#save(Object)}
      *
-     * @param adId          идентификатор объявления, не может быть null
+     * @param adsId          идентификатор объявления, не может быть null
      * @param createComment  создание текста комментария
      * @param authentication авторизованный пользователь
      * @return возвращает добавленный комментарий
