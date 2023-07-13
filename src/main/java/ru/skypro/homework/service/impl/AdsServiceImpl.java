@@ -40,7 +40,7 @@ import java.util.Collection;
 @Transactional
 public class AdsServiceImpl implements AdsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(Ads.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdsServiceImpl.class);
 
     /**
      * Поле репозитория объявлении
@@ -151,7 +151,11 @@ public class AdsServiceImpl implements AdsService {
             imageService.deleteImage(deleteAd.getImageEntity().getId());
             adsRepository.deleteById(adsId);
         } else {
-            throw new ObjectException("Вы не можете удалять чужие объявления");
+            try {
+                throw new ObjectException("Вы не можете удалять чужие объявления");
+            } catch (ObjectException e) {
+                e.getMessage();
+            }
         }
     }
 
@@ -164,8 +168,21 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId) {
+        if (adsId == null) {
+            try {
+                throw new ObjectException("Такого объявления не существует!");
+            } catch (ObjectException e) {
+                e.getMessage();
+            }
+        }
 
         if (createAds.getPrice() < 0) {
+            try {
+                throw new ObjectException("Цена должна быть больше 0!");
+            } catch (ObjectException e) {
+                e.getMessage();
+            }
+
             throw new ObjectException("Цена должна быть больше 0!");
         }
 
@@ -178,8 +195,14 @@ public class AdsServiceImpl implements AdsService {
             adsRepository.save(updateAd);
 
             return adsMapper.toAdsDto(updateAd);
+        } else {
+            try {
+                throw new ObjectException("Вы не можете изменять чужие объявления");
+            } catch (ObjectException e) {
+                e.getMessage();
+            }
+            return null;
         }
-        throw new ObjectException("Вы не можете изменять чужие объявления");
     }
 
     /**
@@ -212,9 +235,14 @@ public class AdsServiceImpl implements AdsService {
             imageService.deleteImage(idDeleteImage);
             adsRepository.save(updateAd);
             return adsMapper.toAdsDto(updateAd).getImage();
+        } else {
+            try {
+                throw new ObjectException("Вы не можете изменить автар этого профиля");
+            } catch (ObjectException e) {
+                e.getMessage();
+            }
+            return null;
         }
-
-        throw new ObjectException("Вы не можете изменять чужие объявления");
     }
 
     /**
@@ -237,10 +265,10 @@ public class AdsServiceImpl implements AdsService {
      * @return true если пользователь действительно собственник объявления, false если нет
      */
     private boolean isOwner(AdsEntity ad, MyUserDetails details) {
+        boolean isOwner = false;
         if (ad.getAuthor().getEmail().equals(details.getUserSecurity().getEmail()) || details.getUserSecurity().getRole() == Role.ADMIN) {
-            return true;
-        } else {
-            return false;
+            isOwner = true;
         }
+        return isOwner;
     }
 }

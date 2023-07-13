@@ -16,6 +16,7 @@ import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.security.MyUserDetails;
 import ru.skypro.homework.service.UserService;
 
 import java.io.File;
@@ -33,7 +34,7 @@ import java.nio.file.Files;
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(User.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     /**
      * Поле репозитория пользователя
@@ -55,6 +56,9 @@ public class UserServiceImpl implements UserService {
      */
     private final PasswordEncoder passwordEncoder;
 
+    private final MyUserDetails userDetails;
+
+
     /**
      * Обновление пароля пользователя
      *
@@ -65,10 +69,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
-        userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
-        userRepository.save(userEntity);
-        userMapper.toDto(userEntity);
+        if (authentication.getName().equals(userDetails.getUserSecurity().getPassword())) {
+            UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
+            userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
+            userRepository.save(userEntity);
+            userMapper.toDto(userEntity);
+        }
     }
 
     /**
