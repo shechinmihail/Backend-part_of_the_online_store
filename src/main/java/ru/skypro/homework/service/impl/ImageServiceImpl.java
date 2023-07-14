@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entity.ImageEntity;
+import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.ImageService;
 
@@ -36,6 +37,6 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public byte[] getImage(Integer id) {
         Optional<ImageEntity> imageEntity = imageRepository.findById(id);
-        return imageEntity.orElseThrow().getData();
+        return imageEntity.orElseThrow(ImageNotFoundException::new).getData();
     }
 }

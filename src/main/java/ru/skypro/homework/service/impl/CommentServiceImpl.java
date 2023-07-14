@@ -13,7 +13,8 @@ import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.exception.AccessException;
+import ru.skypro.homework.exception.AdsNotFoundException;
+import ru.skypro.homework.exception.ObjectException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
@@ -88,7 +89,7 @@ public class CommentServiceImpl implements CommentService {
     public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
         CommentEntity commentEntity = commentMapper.toEntity(createComment);
-        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
         UserEntity author = userRepository.getUserEntitiesByEmail(authentication.getName());
         commentEntity.setAd(adsEntity);
         commentEntity.setAuthor(author);
@@ -111,11 +112,7 @@ public class CommentServiceImpl implements CommentService {
         if (isOwner(adsId, commentId, userDetails)) {
             commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
         } else {
-            try {
-                throw new AccessException("Вы не можете удалить чужой комментарий");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
+            throw new ObjectException("Вы не можете удалить чужой комментарий");
         }
     }
 
@@ -148,12 +145,7 @@ public class CommentServiceImpl implements CommentService {
             commentRepository.save(updateCommentEntity);
             return commentMapper.toDto(updateCommentEntity);
         } else {
-            try {
-                throw new AccessException("Вы не можете изменить чужой комментарий");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
-            return null;
+            throw new ObjectException("Вы не можете изменить чужой комментарий");
         }
     }
 

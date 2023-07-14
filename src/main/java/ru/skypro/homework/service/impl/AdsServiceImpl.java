@@ -15,8 +15,8 @@ import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.exception.AdsNotFoundException;
 import ru.skypro.homework.exception.ObjectException;
+import ru.skypro.homework.exception.AdsNotFoundException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
@@ -151,11 +151,7 @@ public class AdsServiceImpl implements AdsService {
             imageService.deleteImage(deleteAd.getImageEntity().getId());
             adsRepository.deleteById(adsId);
         } else {
-            try {
-                throw new ObjectException("Вы не можете удалять чужие объявления");
-            } catch (ObjectException e) {
-                e.getMessage();
-            }
+            throw new ObjectException("Вы не можете удалять чужие объявления");
         }
     }
 
@@ -168,24 +164,9 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId) {
-        if (adsId == null) {
-            try {
-                throw new ObjectException("Такого объявления не существует!");
-            } catch (ObjectException e) {
-                e.getMessage();
-            }
-        }
-
         if (createAds.getPrice() < 0) {
-            try {
-                throw new ObjectException("Цена должна быть больше 0!");
-            } catch (ObjectException e) {
-                e.getMessage();
-            }
-
             throw new ObjectException("Цена должна быть больше 0!");
         }
-
         AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
         if (isOwner(updateAd, userDetails)) {
             updateAd.setTitle(createAds.getTitle());
@@ -196,12 +177,7 @@ public class AdsServiceImpl implements AdsService {
 
             return adsMapper.toAdsDto(updateAd);
         } else {
-            try {
-                throw new ObjectException("Вы не можете изменять чужие объявления");
-            } catch (ObjectException e) {
-                e.getMessage();
-            }
-            return null;
+            throw new ObjectException("Вы не можете изменять чужие объявления");
         }
     }
 
@@ -236,12 +212,7 @@ public class AdsServiceImpl implements AdsService {
             adsRepository.save(updateAd);
             return adsMapper.toAdsDto(updateAd).getImage();
         } else {
-            try {
-                throw new ObjectException("Вы не можете изменить автар этого профиля");
-            } catch (ObjectException e) {
-                e.getMessage();
-            }
-            return null;
+            throw new ObjectException("Вы не можете изменить автар этого профиля");
         }
     }
 

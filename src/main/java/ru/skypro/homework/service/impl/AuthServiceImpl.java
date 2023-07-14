@@ -26,7 +26,10 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public boolean login(String userName, String password) {
-    UserDetails userDetails = manager.loadUserByUsername(userName); // информация о пользователе
+    UserDetails userDetails = manager.loadUserByUsername(userName);// информация о пользователе
+    if (userDetails == null){
+      return false;
+    }
     return encoder.matches(password, userDetails.getPassword()); // проверка совпадения паролей
   }
 

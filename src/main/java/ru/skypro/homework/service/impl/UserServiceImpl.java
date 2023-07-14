@@ -13,6 +13,7 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.ObjectException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
@@ -69,12 +70,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        if (authentication.getName().equals(userDetails.getUserSecurity().getPassword())) {
-            UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(UserNotFoundException::new);
+        if (passwordEncoder.matches(newPassword.getNewPassword(), userEntity.getPassword())) {
+            throw new ObjectException("Новый пароль не должен совпадать со старым паролем");
+        } else {
             userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
             userRepository.save(userEntity);
-            userMapper.toDto(userEntity);
         }
+        userMapper.toDto(userEntity);
     }
 
     /**
