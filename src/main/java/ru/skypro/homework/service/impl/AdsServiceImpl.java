@@ -39,6 +39,10 @@ import java.util.Collection;
 @Transactional
 public class AdsServiceImpl implements AdsService {
 
+    private static final String EXCEPTION_MESSAGE_FOR_USER = "Пользователь в БД не найден";
+
+    private static final String EXCEPTION_MESSAGE_FOR_AD = "Объявление в БД не найдено";
+
     private static final Logger logger = LoggerFactory.getLogger(AdsServiceImpl.class);
 
     /**
@@ -98,7 +102,7 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Вызван метод добавления объявления");
 
         AdsEntity adsEntity = adsMapper.toEntity(createAds);
-        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new);
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE_FOR_USER));
         adsEntity.setAuthor(author);
 
         ImageEntity adImage;
@@ -134,17 +138,13 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public void deleteAds(Integer adsId) {
         logger.info("Вызван метод удаления объявления по идентификатору (id)");
-        AdsEntity deleteAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity deleteAd = adsRepository.findById(adsId).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE_FOR_AD));
         if (isOwner(deleteAd, userDetails)) {
             commentRepository.deleteCommentEntitiesByAd_Id(adsId);
             imageService.deleteImage(deleteAd.getImageEntity().getId());
             adsRepository.deleteById(adsId);
         } else {
-            try {
-                throw new AccessException("Вы не можете удалять чужие объявления");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
+            throw new AccessException("Вы не можете удалять чужие объявления");
         }
     }
 
@@ -157,39 +157,19 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads updateAds(CreateAds createAds, Integer adsId) {
-        if (adsId == null) {
-            try {
-                throw new ObjectAbsenceException("Такого объявления не существует!");
-            } catch (ObjectAbsenceException e) {
-                e.getMessage();
-            }
-        }
-
         if (createAds.getPrice() < 0) {
-            try {
-                throw new RuntimeException("Цена должна быть больше 0!");
-            } catch (RuntimeException e) {
-                e.getMessage();
-            }
-
+                throw new IllegalArgumentException("Цена должна быть больше 0!");
         }
 
-        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE_FOR_AD));
         if (isOwner(updateAd, userDetails)) {
             updateAd.setTitle(createAds.getTitle());
             updateAd.setPrice(createAds.getPrice());
             updateAd.setDescription(createAds.getDescription());
-
             adsRepository.save(updateAd);
-
             return adsMapper.toAdsDto(updateAd);
         } else {
-            try {
-                throw new AccessException("Вы не можете изменять чужие объявления");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
-            return null;
+            throw new AccessException("Вы не можете изменять чужие объявления");
         }
     }
 
@@ -216,7 +196,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public String updateImage(Integer adsId, MultipartFile image) throws IOException{
         logger.info("Вызван метод обновления картинки объявления");
-        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
+        AdsEntity updateAd = adsRepository.findById(adsId).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE_FOR_AD));
         if (isOwner(updateAd, userDetails)) {
             Integer idDeleteImage = updateAd.getImageEntity().getId();
             updateAd.setImageEntity(imageService.downloadImage(image));
@@ -224,19 +204,14 @@ public class AdsServiceImpl implements AdsService {
             adsRepository.save(updateAd);
             return adsMapper.toAdsDto(updateAd).getImage();
         } else {
-            try {
-                throw new AccessException("Вы не можете изменить автар этого профиля");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
-            return null;
+            throw new AccessException("Вы не можете изменить аватар этого профиля");
         }
     }
 
     @Override
     public byte[] getAdImage(Integer adsId) {
         logger.info("Get image of an AD with a ID: " + adsId);
-        return imageService.getImage(adsRepository.findById(adsId).orElseThrow(RuntimeException::new).getImageEntity().getId());
+        return imageService.getImage(adsId);
     }
 
     private boolean isOwner(AdsEntity ad, MyUserDetails details) {

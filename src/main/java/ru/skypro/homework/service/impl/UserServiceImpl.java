@@ -12,6 +12,7 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.ImageEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.ObjectAbsenceException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.security.MyUserDetails;
@@ -31,6 +32,8 @@ import java.nio.file.Files;
 @RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
+
+    private static final String EXCEPTION_MESSAGE = "Пользователь в БД не найден";
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -61,8 +64,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("Вызван метод обновления пароля пользователя");
-        if (authentication.getName().equals(userDetails.getUserSecurity().getPassword())) {
-            UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new);
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE));
+        if (userEntity.getPassword().equals(userDetails.getUserSecurity().getPassword())) {
             userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
             userRepository.save(userEntity);
             userMapper.toDto(userEntity);
@@ -91,7 +94,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, Authentication authentication) {
         logger.info("Вызван метод обновления информации об авторизованном пользователе");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new);
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE));
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setPhone(user.getPhone());
@@ -108,7 +111,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
         logger.info("Вызван метод обновления аватара авторизованного пользователя");
-        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(RuntimeException::new);
+        UserEntity userEntity = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE));
         ImageEntity imageEntity = imageService.downloadImage(image);
         imageService.deleteImage(userEntity.getImageEntity().getId());
         userEntity.setImageEntity(imageEntity);
@@ -118,9 +121,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public byte[] getUserImage(Integer userId) throws IOException {
         logger.info("Request to getting image");
-        UserEntity user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
-        if (user.getImageEntity() != null) {
-            return user.getImageEntity().getData();
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new ObjectAbsenceException(EXCEPTION_MESSAGE));
+        if (userEntity.getImageEntity() != null) {
+            return userEntity.getImageEntity().getData();
         } else {
             File emptyAvatar = new File("src/main/resources/static/emptyAvatar.png");
             return Files.readAllBytes(emptyAvatar.toPath());

@@ -14,6 +14,7 @@ import ru.skypro.homework.entity.AdsEntity;
 import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.AccessException;
+import ru.skypro.homework.exception.ObjectAbsenceException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
@@ -88,8 +89,8 @@ public class CommentServiceImpl implements CommentService {
     public Comment addComment(@NotNull Integer adsId, CreateComment createComment, Authentication authentication) {
         logger.info("Вызван метод добавления комментария");
         CommentEntity commentEntity = commentMapper.toEntity(createComment);
-        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(RuntimeException::new);
-        UserEntity author = userRepository.getUserEntitiesByEmail(authentication.getName());
+        AdsEntity adsEntity = adsRepository.findById(adsId).orElseThrow(() -> new ObjectAbsenceException("Такого объявления не существует"));
+        UserEntity author = userRepository.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ObjectAbsenceException("Такого пользователя не существует"));
         commentEntity.setAd(adsEntity);
         commentEntity.setAuthor(author);
         commentEntity.setCreatedAt(LocalDateTime.now());
@@ -111,11 +112,7 @@ public class CommentServiceImpl implements CommentService {
         if (isOwner(adsId, commentId, userDetails)) {
             commentRepository.deleteCommentEntitiesByAd_IdAndId(adsId, commentId);
         } else {
-            try {
-                throw new AccessException("Вы не можете удалить чужой комментарий");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
+            throw new AccessException("Вы не можете удалить чужой комментарий");
         }
     }
 
@@ -138,12 +135,7 @@ public class CommentServiceImpl implements CommentService {
             commentRepository.save(updateCommentEntity);
             return commentMapper.toDto(updateCommentEntity);
         } else {
-            try {
-                throw new AccessException("Вы не можете изменить чужой комментарий");
-            } catch (AccessException e) {
-                e.getMessage();
-            }
-            return null;
+            throw new AccessException("Вы не можете изменить чужой комментарий");
         }
     }
 
